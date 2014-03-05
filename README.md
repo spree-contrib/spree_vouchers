@@ -1,7 +1,13 @@
 SpreeVouchers
 =============
 
-Introduction goes here.
+This is an incomplete implemenation and is under heavy development
+
+The extension allows the purchase and (full or partial) redemption of vouchers.
+
+Vouchers are treated as payment methods.
+
+Authorize, Capture, Void, and Credit are supported.
 
 Installation
 ------------
@@ -37,4 +43,4 @@ Simply add this require statement to your spec_helper:
 require 'spree_vouchers/factories'
 ```
 
-Copyright (c) 2014 [name of extension creator], released under the New BSD License
+Copyright (c) 2014 Jeff Squires, released under the New BSD License
