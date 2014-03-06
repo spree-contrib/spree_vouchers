@@ -1,10 +1,15 @@
 FactoryGirl.define do
+  factory :voucher_payment_method, class: Spree::PaymentMethod::Voucher do
+    name 'Voucher'
+    environment 'test'
+  end
+
   factory :voucher, :class => 'Spree::Voucher' do
     number '12341234abcdefg'
     expiration 1.year.from_now
     original_amount 25.00
     remaining_amount 25.00
-    currency 'GBP'
+    currency 'USD'
 
     factory :authorized_voucher do
       authorized_amount 10

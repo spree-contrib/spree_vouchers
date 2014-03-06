@@ -13,26 +13,26 @@ describe Spree::Voucher do
       expect { voucher.authorize(1, voucher.currency) }.to change{voucher.authorized_amount}.from(voucher.authorized_amount).to(voucher.authorized_amount + 1)
     end
     it "allows no more than available" do
-      voucher.authorize(100000, voucher.currency).should be_nil
+      voucher.authorize(100000, voucher.currency).should be_false
     end
     it "disallows fully authorized vouchers" do
-      fully_authorized_voucher.authorize(1, voucher.currency).should be_nil
+      fully_authorized_voucher.authorize(1, voucher.currency).should be_false
     end
     it "disallows exhausted vouchers" do
-      exhausted_voucher.authorize(1, voucher.currency).should be_nil
+      exhausted_voucher.authorize(1, voucher.currency).should be_false
     end
     it "disallows expired vouchers" do
-      expired_voucher.authorize(1, voucher.currency).should be_nil
+      expired_voucher.authorize(1, voucher.currency).should be_false
     end
     it "allows vouchers with no expiration date" do
       voucher.update_attributes(expiration: nil)
-      voucher.authorize(1, voucher.currency).should_not be_nil
+      voucher.authorize(1, voucher.currency).should be_true
     end
-    it "returns non-nil on success" do
-      voucher.authorize(1, voucher.currency).should_not be_nil
+    it "returns true on success" do
+      voucher.authorize(1, voucher.currency).should be_true
     end
     it "rejects a voucher not matching the order currency" do
-      voucher.authorize(1, 'EUR').should be_nil
+      voucher.authorize(1, 'EUR').should be_false
     end
   end
 

@@ -6,22 +6,35 @@ module Spree
     validates :number, :original_amount, :currency, presence: true
 
     def authorize(amount, order_currency)
-      if (remaining_amount - authorized_amount) <  amount
-        errors.add(:base,"Insufficient funds for voucher: #{self.number}")
-        return nil
-      elsif expiration && expiration <= Time.now
-        errors.add(:base,"Expired voucher: #{self.number}")
-        return nil
-      elsif currency != order_currency
-        errors.add(:base,"Currency mismatch: Your order has currency: #{order_currency} but voucher #{self.number} has currency #{self.currency}")
-        return nil
-      else
-        self.authorized_amount = self.authorized_amount + amount
-        save!
+      if soft_authorize(amount, order_currency)
+        update_attributes(authorized_amount: self.authorized_amount + amount)
 
         event = self.voucher_events.create!(action: 'authorize', :amount => amount, authorization_code: generate_authorization_code)
         return event.authorization_code
+      else
+        return  false
       end
+    end
+
+    def soft_authorize(amount, order_currency)
+      Rails.logger.error "crap0"
+
+      Rails.logger.error "#{amount} - #{order_currency} - #{remaining_amount} - #{authorizable_amount} - #{self.number}"
+
+      if authorizable_amount <  amount
+      Rails.logger.error "crap1"
+
+        errors.add(:base,"Insufficient funds for voucher: #{self.number}")
+      elsif expiration && expiration <= Time.now
+      Rails.logger.error "crap2"
+
+        errors.add(:base,"Expired voucher: #{self.number}")
+      elsif currency != order_currency
+        Rails.logger.error "crap3 #{currency} - #{order_currency}"
+
+        errors.add(:base,"Currency mismatch: Your order has currency: #{order_currency} but voucher #{self.number} has currency #{self.currency}")
+      end
+      return errors.blank?
     end
 
     def capture(amount, authorization_code, order_currency)
@@ -115,6 +128,10 @@ module Spree
       return false unless payment.completed?
       return false unless payment.order.payment_state == 'credit_owed'
       payment.credit_allowed > 0
+    end
+
+    def authorizable_amount
+      remaining_amount - authorized_amount
     end
 
     private
