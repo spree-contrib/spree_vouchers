@@ -19,21 +19,21 @@ describe Spree::PaymentMethod::Voucher do
 
     it "declines a voucher with insuffient funds" do
       voucher = create(:voucher)
-      resp = subject.authorize(voucher.remaining_amount + 1, Spree::Voucher.new(number: voucher.number), gateway_options)
+      resp = subject.authorize((voucher.remaining_amount * 100) + 1, Spree::Voucher.new(number: voucher.number), gateway_options)
       resp.success?.should be_false
       resp.message.should include "Insufficient funds for voucher"
     end
 
     it "declines an expired voucher" do
       voucher = create(:expired_voucher)
-      resp = subject.authorize(voucher.remaining_amount - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
+      resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
       resp.success?.should be_false
       resp.message.should include "Expired voucher"
     end
 
     it "declines a voucher not matching the order currency" do
       voucher = create(:voucher, currency: 'AUD')
-      resp = subject.authorize(voucher.remaining_amount - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
+      resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
       resp.success?.should be_false
       resp.message.should include "Currency mismatch"
     end
@@ -41,14 +41,14 @@ describe Spree::PaymentMethod::Voucher do
     # not the right place for this spec...it's a dupe of the one in the right place
     it "allows a voucher having no expiration" do
       voucher = create(:voucher, expiration: nil)
-      resp = subject.authorize(voucher.remaining_amount - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
+      resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
       resp.success?.should be_true
       resp.authorization.should_not be_nil
     end
 
     it "authorizes a valid voucher" do
       voucher = create(:voucher)
-      resp = subject.authorize(voucher.remaining_amount - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
+      resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
 
       resp.success?.should be_true
       resp.authorization.should_not be_nil
@@ -67,21 +67,21 @@ describe Spree::PaymentMethod::Voucher do
       auth_code = voucher.voucher_events.where(action: 'authorize').first.authorization_code
 
       voucher.update_attributes(remaining_amount: voucher.authorized_amount - 1)
-      resp = subject.capture(voucher.authorized_amount, auth_code, gateway_options)
+      resp = subject.capture((voucher.authorized_amount * 100), auth_code, gateway_options)
       resp.success?.should be_false
       resp.message.should include "Authorized amount is greater than the remaining amount!"
     end
 
     it "declines a voucher with a requested amount greater than the authorized amount" do
       voucher = create(:authorized_voucher)
-      resp = subject.capture(voucher.authorized_amount + 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
+      resp = subject.capture((voucher.authorized_amount * 100) + 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
       resp.success?.should be_false
       resp.message.should include "Attempting to capture more than the Authorized amount!"
     end
 
     it "declines a voucher not matching the order currency" do
       voucher = create(:authorized_voucher, currency: 'AUD')
-      resp = subject.capture(voucher.authorized_amount - 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
+      resp = subject.capture((voucher.authorized_amount * 100) - 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
 
       resp.success?.should be_false
       resp.message.should include "Currency mismatch"
@@ -89,7 +89,7 @@ describe Spree::PaymentMethod::Voucher do
 
     it "captures a valid voucher" do
       voucher = create(:authorized_voucher)
-      resp = subject.capture(voucher.authorized_amount, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
+      resp = subject.capture((voucher.authorized_amount * 100), voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
 
       resp.success?.should be_true
       resp.message.should include "Successful voucher capture"
