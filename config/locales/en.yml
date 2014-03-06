@@ -1,5 +1,9 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
-  hello: "Hello world"
+  spree:
+    voucher: "Voucher"
+    no_voucher_exists_for_number: "No voucher exists for number %{number}"
+    unknown_voucher_error: "We encountered a problem applying voucher - Please contact support for more detail"
+    unable_to_apply_voucher_with_remaining_balance: "Unable to apply voucher.  Remaining balance is %{available}"
+    voucher_applied_for_amount_with_remaining_balance:  "%{payment_amount} applied.  Remaining balance of voucher: %{available}"
+    voucher_total: "Voucher Total"
+    order_total_minus_vouchers: "Amount due"

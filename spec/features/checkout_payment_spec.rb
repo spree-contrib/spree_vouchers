@@ -46,44 +46,4 @@ describe "Checkout/Payment", inaccessible: true do
     # context "redeem voucher(s) and a SINGLE instance of ONE other payment type in the same order (e.g. 1 credit card. 1 paypal payment)"
   end
 
-#=========== jeff is going to move many of these contexts into a model spec where they belong ======== #
-
-  context "Refunds" do
-    context "expired voucher" do
-      pending "it behaves however we decide it behaves"
-    end
-
-    context "order fully paid by voucher" do
-      pending "adds the full order balance back on to the voucher"
-    end
-
-    context "order partially paid by voucher" do
-      # Jeff is thinking we'll want to refund vouchers last
-
-      context "refund is less than the amount paid on credit card" do
-        pending "adds the amount paid back to the credit card"
-        pending "does not affect the voucher balance"
-      end
-
-      context "refund exceeds the amount paid on credit card" do
-        pending "adds the amount paid back to the credit card"
-        
-        context "single voucher" do
-          pending "adds the remainder to the voucher"
-        end
-        context "multiple vouchers" do
-          pending "Jeff is thinking: pick the highest one first, try to completely refill it, then move on the the next"
-          context "first voucher can hold the remaining amount" do
-            pending "One highest-valued voucher has its balance adjusted the refund amount"
-          end
-
-          context "first voucher can not hold the remaining amount" do
-            pending "The highest-valued voucher has its balance adjusted the original 'max' voucher amount"
-            pending "The next-highest-valued voucher has its balance adjusted for the remaining amount"
-          end
-
-        end
-      end
-    end
-  end
 end

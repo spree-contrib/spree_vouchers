@@ -1,0 +1,17 @@
+@import 'spree/frontend/variables';
+
+#checkout-summary {
+  table {
+    tr[data-hook="order_total"] {
+      border-bottom: $default_border;
+    };
+
+
+    #summary-order-minus-vouchers-total {
+      font-weight: bold;
+      color: $link_text_color;
+      font-size: $base_font_size + 2;
+      border-bottom: none;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+<!-- insert_after "#payment-methods, [data-hook=payment-methods]" -->
+
+<% if @order.total_minus_pending_vouchers > 0 %>
+
+<div>
+<%= link_to Spree.t(:use_a_voucher), "#", id: "use_a_voucher" %>
+<p id="voucher_fields" class="field" style="display: none">
+  <%= label_tag "voucher_number", Spree.t(:voucher_number) %><br />
+  <%= text_field_tag "voucher_number", nil, {:size => 19, :maxlength => 19} %>
+  <%= hidden_field_tag "voucher_order_id", @order.id %>
+  <%= link_to Spree.t(:apply_voucher), "#", id: "apply_voucher" %>
+</p>
+</div>
+<% end %>

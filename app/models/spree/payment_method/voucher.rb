@@ -32,7 +32,7 @@ module Spree
       payment.state != 'void'
     end
 
-    def authorize(money, source, gateway_options = {})
+    def authorize(amount_in_cents, source, gateway_options = {})
       # a voucher is authorized if: it exists, is not expired, and has a postive balance
       # Voucher.where("balance > 0").where("date <= ?", Time.now).exists?
       voucher = Voucher.where(number: source.number).first
@@ -41,15 +41,15 @@ module Spree
         ActiveMerchant::Billing::Response.new(false, "Could not find voucher: #{source.number}", {}, {})
       else
         action = ->(voucher) {
-          voucher.authorize(money, gateway_options[:currency])
+          voucher.authorize(amount_in_cents / 100, gateway_options[:currency])
         }
         handle_action_call(voucher, action, :authorize)
       end
     end
 
-    def capture(amount, auth_code, gateway_options)
+    def capture(amount_in_cents, auth_code, gateway_options)
       action = ->(voucher) {
-        voucher.capture(amount, auth_code, gateway_options[:currency])
+        voucher.capture(amount_in_cents / 100, auth_code, gateway_options[:currency])
       }
 
       handle_action(action,:capture, auth_code)
@@ -65,9 +65,9 @@ module Spree
     end
 
 
-    def credit(amount, auth_code, gateway_options)
+    def credit(amount_in_cents, auth_code, gateway_options)
       action = ->(voucher) {
-        voucher.credit(amount, auth_code, gateway_options[:currency])
+        voucher.credit(amount_in_cents / 100, auth_code, gateway_options[:currency])
       }
 
       handle_action(action,:credit, auth_code)

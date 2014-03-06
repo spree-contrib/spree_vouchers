@@ -1,0 +1,13 @@
+<!-- insert_after "[data-hook=order_total]" -->
+<% if order.payments.any? { |p| p.voucher? && p.pending? }%>
+  <% order.payments.select { |p| p.voucher? && p.pending? }.each do |voucher_payment| %>
+  <tr>
+    <td><strong><%= Spree.t(:voucher) %>: <%= voucher_payment.source.number %></strong></td>
+    <td><strong><span id='summary-order-voucher-amount'><%= voucher_payment.money.to_html %></span></strong></td>
+  </tr>
+  <% end %>
+  <tr>
+    <td><strong><%= Spree.t(:order_total_minus_vouchers) %>:</strong></td>
+    <td><strong><span id='summary-order-minus-vouchers-total'><%= order.display_total_minus_pending_vouchers.to_html %></span></strong></td>
+  </tr>
+<% end %>

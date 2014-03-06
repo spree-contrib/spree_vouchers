@@ -197,4 +197,45 @@ describe Spree::Voucher do
     end
 
   end
+
+  context "Refunds" do
+    context "expired voucher" do
+      pending "it behaves however we decide it behaves"
+    end
+
+    context "order fully paid by voucher" do
+      pending "adds the full order balance back on to the voucher"
+    end
+
+    context "order partially paid by voucher" do
+
+      context "refund is less than the amount paid on voucher" do
+        pending "adds the refund amount back to the voucher"
+        pending "does not affect the credit card"
+      end
+
+      context "refund exceeds the amount paid on voucher(s)" do
+        pending "adds the amount paid back to the voucher"
+        
+        context "single voucher" do
+          pending "adds the remainder to the credit card"
+        end
+        context "multiple vouchers" do
+          pending "Jeff is thinking: pick the highest one first, try to completely refill it, then move on the the next"
+          context "first voucher can hold the remaining amount" do
+            pending "One highest-valued voucher has its balance adjusted by the refund amount"
+          end
+
+          context "first voucher can not hold the remaining amount" do
+            pending "The highest-valued voucher has its balance adjusted the original 'max' voucher amount"
+            pending "The next-highest-valued voucher has its balance adjusted for the remaining amount"
+          end
+
+        end
+      end
+    end
+  end
 end
+
+
+# can only create a payment if credit owed

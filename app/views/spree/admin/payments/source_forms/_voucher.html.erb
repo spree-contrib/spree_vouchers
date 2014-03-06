@@ -1,0 +1,52 @@
+<%# don't show this payment method unless a voucher was initially used %>
+<% if @order.payments.any? { |payment| payment.persisted? && payment.voucher? } %>
+
+<% param_prefix = "payment_source[#{payment_method.id}]" %>
+
+<fieldset>
+    <div class="alpha omega four columns">
+      <div>
+        <div class="field">
+          <%= label_tag "voucher_number", Spree.t(:voucher_number) %><span class="required">*</span><br />
+          <%= text_field_tag "#{param_prefix}[number]", nil, {:id => 'voucher_number', :class => 'required', :size => 19, :maxlength => 19} %>
+        </div>
+      </div>
+    </div>
+
+    <div class="alpha omega four columns">
+      <div>
+        <p>Voucher(s) used on this order</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th><%= Spree.t(:voucher_number) %></th>
+              <th><%= Spree.t(:voucher_expiration) %></th>
+              <th><%= Spree.t(:voucher_original_amount) %></th>
+              <th><%= Spree.t(:voucher_remaining_amount) %></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <% @order.payments.each do |payment| %>
+              <% next unless payment.voucher? %>
+
+              <tr>
+                <td class="align-center"><% payment.source.number %></td>
+                <td class="align-center"><% payment.source.expiration %></td>
+                <td class="align-center"><% payment.source.original_amount %></td>
+                <td class="align-center"><% payment.source.remaining_amount %></td>
+              </tr>
+
+            <% end %>        
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="clear"></div>
+  </div>
+</fieldset>
+
+<% end %>

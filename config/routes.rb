@@ -1,3 +1,3 @@
 Spree::Core::Engine.routes.draw do
-  # Add your extension routes here
+  post '/apply_voucher', to: 'checkout#apply_voucher', as: :apply_voucher
 end

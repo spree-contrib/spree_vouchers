@@ -1,0 +1,12 @@
+<!-- insert_after "#payment,[data-hook=payment]" -->
+
+<% if @order.total_minus_pending_vouchers <= 0 %>
+  <%# hide the existing payment methods as they are not needed %>
+  <%= javascript_tag do %>
+    $(function() {
+      $("#payment-method-fields, [data-hook=payment-method-fields]").find("input[type=radio]").attr("checked", false);
+      $("#payment-method-fields, [data-hook=payment-method-fields]").hide();
+      $("#payment-methods, [data-hook=payment-methods]").hide();
+    });
+  <% end %>
+<% end %>
