@@ -1,4 +1,3 @@
-# borrowed from spree_backend#admin.js.erb
 $ ->
   ($ '#use_a_voucher').on 'click', (event) ->
     event.preventDefault()

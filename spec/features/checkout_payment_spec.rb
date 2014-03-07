@@ -208,5 +208,59 @@ describe "Checkout/Payment", inaccessible: true do
         find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 2, { currency: voucher.currency }))
       end
     end
+
+    context "Removing a voucher from an order" do
+      context "More than one voucher" do
+        let(:voucher1) { create(:voucher, number: 'abcd', original_amount: 1, remaining_amount: 1) }
+        let(:voucher2) { create(:voucher, number: 'wxyz', original_amount: 1, remaining_amount: 1) }
+
+
+        before do
+          click_link Spree.t(:use_a_voucher)
+          fill_in 'voucher_number', with: voucher1.number
+          click_link Spree.t(:apply_voucher)
+
+          click_link Spree.t(:use_a_voucher)
+          fill_in 'voucher_number', with: voucher2.number
+          click_link Spree.t(:apply_voucher)
+
+          find(".summary-order-voucher-detail:eq(0) a").click
+        end
+
+        it "modifies the order total in the order summary", js: true do
+          find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 1, { currency: voucher.currency }))
+        end
+
+        it "removes the removed voucher entry from the order summary", js: true do
+          find(".summary-order-voucher-detail .summary-order-voucher-number:eq(0)").should have_content(voucher2.number)
+          find(".summary-order-voucher-detail .summary-order-voucher-amount").count.should == 1
+        end
+      end
+
+      context "Voucher is the only payment" do
+        before do
+          click_link Spree.t(:use_a_voucher)
+          fill_in 'voucher_number', with: voucher.number
+          click_link Spree.t(:apply_voucher)
+          find(".summary-order-voucher-detail a").click
+        end
+
+        it "notifies the user in the flash section", js: true do
+          msg = Spree.t(:voucher_removed_for_amount_with_remaining_balance, 
+                        { payment_amount: Spree::Money.new(@order.total, { currency: voucher.currency }),
+                          available: voucher.reload.authorizable_amount })
+          page.should have_content(msg)
+        end
+
+        it "removes the 'Amount Due' line from the order summary", js: true do
+          page.should_not have_selector "#summary-order-minus-vouchers-total"
+        end
+
+        it "removes the line pertaining to this voucher payment in the order summary", js: true do
+          page.should_not have_selector(".summary-order-voucher-detail .summary-order-voucher-amount")
+        end
+      end
+      
+    end
   end
 end

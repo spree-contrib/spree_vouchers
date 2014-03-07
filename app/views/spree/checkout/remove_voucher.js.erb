@@ -1,0 +1,15 @@
+<% if flash[:error] %>
+  SpreeVouchers.show_flash('error', '<%= flash[:error] %>');
+<% elsif flash[:notice] %>
+  SpreeVouchers.show_flash('notice', '<%= flash[:notice] %>');
+  $('#voucher_fields').hide();
+  $("[data-hook=checkout_summary_box]").html('<%= escape_javascript(render :partial => 'summary', :locals => { :order => @order }) %>');
+
+  <% if @order.outstanding_balance > 0 %>
+    $('#voucher_usage').show()
+    $('#use_a_voucher').show();
+    $("#payment-methods, [data-hook=payment-methods]").show();
+$("#payment-method-fields, [data-hook=payment-method-fields]").find("input[type=radio]:eq(0)").click();
+    $("#payment-method-fields, [data-hook=payment-method-fields]").show();
+  <% end %>
+<% end %>

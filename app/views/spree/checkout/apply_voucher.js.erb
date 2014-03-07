@@ -12,4 +12,8 @@
     $("#payment-method-fields, [data-hook=payment-method-fields]").find("input[type=radio]").attr("checked", false);
     $("#payment-method-fields, [data-hook=payment-method-fields]").hide();
   <% end %>
+
+  // we need to make sure our 'remove' link works in the order summary
+  SpreeVouchers.attach_remove_voucher_event()
 <% end %>
+

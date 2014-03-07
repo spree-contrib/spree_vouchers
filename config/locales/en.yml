@@ -10,3 +10,5 @@ en:
     use_a_voucher: "Use a voucher"
     apply_voucher: "Apply voucher"
     no_voucher_expiration_applicable: "n/a"
+    voucher_removed_for_amount_with_remaining_balance:  "Voucher payment of %{payment_amount} removed.  Remaining balance: %{available}"
+    unable_to_remove_voucher: "We encountered an unknown error attempting to remove the voucher from this order"

@@ -1,4 +1,5 @@
 //= require spree/frontend/apply_voucher
+//= require spree/frontend/remove_voucher
 //= require_self
 
 var SpreeVouchers = {
@@ -11,5 +12,19 @@ var SpreeVouchers = {
       $("#wrapper").prepend(flash_div);
     }
     flash_div.html(message).show().delay(5000).fadeOut(500);
+  },
+  attach_remove_voucher_event: function() {
+    $('.remove_voucher').on('click', function(event) {
+      event.preventDefault();
+
+      $.ajax({
+        type: "POST",
+        url: "/remove_voucher",
+        data: {
+          payment_id: $(this).data('payment-id')
+        },
+        dataType: "script"
+      });
+    });
   }
-}
+};

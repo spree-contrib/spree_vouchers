@@ -33,8 +33,6 @@ module Spree
     end
 
     def authorize(amount_in_cents, source, gateway_options = {})
-      Rails.logger.error "precrap0"
-
       # a voucher is authorized if: it exists, is not expired, and has a postive balance
       # Voucher.where("balance > 0").where("date <= ?", Time.now).exists?
       voucher = Voucher.where(number: source.number).first

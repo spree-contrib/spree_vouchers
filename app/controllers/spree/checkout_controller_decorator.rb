@@ -2,10 +2,22 @@ module Spree
   CheckoutController.class_eval do
     respond_to :html, :js
 
+    def remove_voucher
+      @payment = Payment.find params[:payment_id]
+      payment_amount = @payment.amount
+
+      if @payment.void
+        @order = @payment.order.reload
+        voucher = @payment.source.reload
+        flash[:notice]= Spree.t(:voucher_removed_for_amount_with_remaining_balance, 
+                                { payment_amount: payment_amount, 
+                                  available: voucher.authorizable_amount})
+      else
+        flash[:error]= Spree.t(:unable_to_remove_voucher)
+      end
+    end
     
     def apply_voucher
-      Rails.logger.error "applycrap0"
-
       @order = Order.find params[:voucher_order_id]
       voucher = Voucher.find_by_number params[:voucher_number]
 

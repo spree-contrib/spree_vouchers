@@ -17,21 +17,13 @@ module Spree
     end
 
     def soft_authorize(amount, order_currency)
-      Rails.logger.error "crap0"
-
-      Rails.logger.error "#{amount} - #{order_currency} - #{remaining_amount} - #{authorizable_amount} - #{self.number}"
+      Rails.logger.debug "#{amount} - #{order_currency} - #{remaining_amount} - #{authorizable_amount} - #{self.number}"
 
       if authorizable_amount <  amount
-      Rails.logger.error "crap1"
-
         errors.add(:base,"Insufficient funds for voucher: #{self.number}")
       elsif expiration && expiration <= Time.now
-      Rails.logger.error "crap2"
-
         errors.add(:base,"Expired voucher: #{self.number}")
       elsif currency != order_currency
-        Rails.logger.error "crap3 #{currency} - #{order_currency}"
-
         errors.add(:base,"Currency mismatch: Your order has currency: #{order_currency} but voucher #{self.number} has currency #{self.currency}")
       end
       return errors.blank?
