@@ -7,7 +7,7 @@
 
   <% if @order.outstanding_balance > 0 %>
     $('#voucher_usage').show()
-    $('#use_a_voucher').show();
+    // $('#use_a_voucher').show();
     $("#payment-methods, [data-hook=payment-methods]").show();
 $("#payment-method-fields, [data-hook=payment-method-fields]").find("input[type=radio]:eq(0)").click();
     $("#payment-method-fields, [data-hook=payment-method-fields]").show();

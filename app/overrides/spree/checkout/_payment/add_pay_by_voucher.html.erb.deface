@@ -1,6 +1,6 @@
 <!-- insert_after "#payment-methods, [data-hook=payment-methods]" -->
 
-<div id="voucher_usage">
+<div id="voucher_usage" <% if @no_more_payment_required %>style="display:none;"<% end %>>
 <%= link_to Spree.t(:use_a_voucher), "#", id: "use_a_voucher" %>
 <p id="voucher_fields" class="field" style="display: none">
   <%= label_tag "voucher_number", Spree.t(:voucher_number) %><br />

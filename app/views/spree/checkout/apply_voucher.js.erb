@@ -7,7 +7,8 @@
 
   <%# should we clear out all the payment fields so we can proceed withouth validation errors? %>
   <% if @no_more_payment_required %>
-    $('#use_a_voucher').hide();
+    $('#voucher_usage').hide()
+    // $('#use_a_voucher').hide();
     $("#payment-methods, [data-hook=payment-methods]").hide();
     $("#payment-method-fields, [data-hook=payment-method-fields]").find("input[type=radio]").attr("checked", false);
     $("#payment-method-fields, [data-hook=payment-method-fields]").hide();

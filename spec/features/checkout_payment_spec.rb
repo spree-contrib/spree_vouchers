@@ -72,6 +72,7 @@ describe "Checkout/Payment", inaccessible: true do
       # the other payment fields should be hidden
       find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
       find("#payment-methods, [data-hook=payment-methods]").visible?.should be_false
+      find("#voucher_usage").visible?.should be_false
 
       click_button Spree.t(:save_and_continue)
       current_path.should == spree.checkout_state_path(:confirm)
@@ -239,6 +240,10 @@ describe "Checkout/Payment", inaccessible: true do
 
       it "removes the line pertaining to this voucher payment in the order summary", js: true do
         page.should_not have_selector(".summary-order-voucher-detail .summary-order-voucher-amount")
+      end
+
+      it "always shows the 'use a voucher' option after removal", js: true do
+        find("#voucher_usage").visible?.should be_true
       end
     end # voucher is the only payment
     
