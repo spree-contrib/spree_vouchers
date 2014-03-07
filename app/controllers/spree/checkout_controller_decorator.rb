@@ -32,7 +32,7 @@ module Spree
         # we don't actually want to authorize until the order is completed,
         # so do a 'pretend' auth to get the approve/reject as well as the new totals
         if amount > 0 && voucher.soft_authorize(amount, @order.currency)
-          @payment = @order.payments.create(source: voucher,
+          @payment = @order.payments.create!(source: voucher,
                                          payment_method: voucher_payment_method,
                                          amount: amount)
 

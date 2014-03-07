@@ -61,21 +61,41 @@ describe "Checkout/Payment", inaccessible: true do
   end
 
   context "Voucher Redemption" do
-    it "supports paying solely by voucher", js: true  do
-      click_link Spree.t(:use_a_voucher)
-      fill_in 'voucher_number', with: voucher.number
-      click_link Spree.t(:apply_voucher)
+    context "paying solely by voucher" do
+      before do
+        click_link Spree.t(:use_a_voucher)
+        fill_in 'voucher_number', with: voucher.number
+        click_link Spree.t(:apply_voucher)
+      end 
 
-      # the 'Amount Due' should now show zero
-      find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
+      it "shows an amount due of zero", js: true  do
+        find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
+      end
 
-      # the other payment fields should be hidden
-      find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
-      find("#payment-methods, [data-hook=payment-methods]").visible?.should be_false
-      find("#voucher_usage").visible?.should be_false
+      it "hides all the payment fields", js: true do
+        # this is just to force 'wait'
+        find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
 
-      click_button Spree.t(:save_and_continue)
-      current_path.should == spree.checkout_state_path(:confirm)
+        find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
+        find("#payment-methods, [data-hook=payment-methods]").visible?.should be_false
+        find("#voucher_usage").visible?.should be_false
+      end
+
+      it "allows completion without entering other payment", js: true do
+        # this is just to force 'wait'
+        find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
+
+        click_button Spree.t(:save_and_continue)
+        click_button Spree.t(:place_order)
+        current_path.start_with?(spree.order_path(@order.number)).should be_true
+      end
+
+      it "clears the voucher number from the entry form", js: true do
+        # this is just to force 'wait'
+        find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
+
+        find("#voucher_number").text.should == ''
+      end
     end
 
     it "supports paying solely by other payment method (e.g. credit card)", js: true do
@@ -214,6 +234,15 @@ describe "Checkout/Payment", inaccessible: true do
       it "removes the removed voucher entry from the order summary", js: true do
         find(:xpath, '//tr[@class="summary-order-voucher-detail"][1]/td[1]/strong').should have_content low_balance_voucher2.number
         page.all(".summary-order-voucher-detail .summary-order-voucher-amount").count.should == 1
+      end
+
+      # we have an event handler re-attached in the 'remove' javascript.  
+      # This ensures the ajax didn't mess up the handlers on the first removal
+      it "allows removal of all the vouchers", js: true do
+        first(".summary-order-voucher-detail").find("a").click
+        # use the technique listed in the capybara readme (search for: always use the latter!)
+        # in order to wait for the ajax to complete
+        page.should have_no_xpath('//tr[@class="summary-order-voucher-detail"][1]')
       end
     end # more than one voucher
 
