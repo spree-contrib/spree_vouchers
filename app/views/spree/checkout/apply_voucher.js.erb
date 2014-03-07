@@ -1,9 +1,9 @@
 <% if flash[:error] %>
   SpreeVouchers.show_flash('error', '<%= flash[:error] %>');
 <% elsif flash[:notice] %>
-  SpreeVouchers.show_flash('notice', '<%= flash[:notice] %>');
   $('#voucher_fields').hide();
   $("[data-hook=checkout_summary_box]").html('<%= escape_javascript(render :partial => 'summary', :locals => { :order => @order }) %>');
+  SpreeVouchers.show_flash('notice', '<%= flash[:notice] %>');
 
   <%# should we clear out all the payment fields so we can proceed withouth validation errors? %>
   <% if @no_more_payment_required %>

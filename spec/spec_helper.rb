@@ -34,6 +34,7 @@ require 'spree/testing_support/order_walkthrough'
 require 'spree_vouchers/factories'
 
 Capybara.default_driver = :selenium
+Capybara.default_wait_time = 5
 
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
@@ -65,10 +66,10 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = false
 
   # Ensure Suite is set to use transactions for speed.
-  config.before :suite do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with :truncation
-  end
+#  config.before :suite do
+#    DatabaseCleaner.strategy = :transaction
+#    DatabaseCleaner.clean_with :truncation
+#  end
 
   # Before each spec check if it is a Javascript test and switch between using database transactions or not where necessary.
   config.before :each do
@@ -83,3 +84,14 @@ RSpec.configure do |config|
 
   config.fail_fast = ENV['FAIL_FAST'] || false
 end
+=begin
+class ActiveRecord::Base
+  mattr_accessor :shared_connection
+  @@shared_connection = nil
+
+  def self.connection
+    @@shared_connection || retrieve_connection
+  end
+end
+ActiveRecord::Base.shared_connection = ActiveRecord::Base.connection
+=end

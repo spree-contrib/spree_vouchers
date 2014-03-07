@@ -10,8 +10,8 @@ module Spree
         @order = @payment.order.reload
         voucher = @payment.source.reload
         flash[:notice]= Spree.t(:voucher_removed_for_amount_with_remaining_balance, 
-                                { payment_amount: payment_amount, 
-                                  available: voucher.authorizable_amount})
+                                { payment_amount: Spree::Money.new(payment_amount, {currency: voucher.currency}), 
+                                  available: Spree::Money.new(voucher.authorizable_amount, {currency: voucher.currency})})
       else
         flash[:error]= Spree.t(:unable_to_remove_voucher)
       end

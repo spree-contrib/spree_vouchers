@@ -1,6 +1,7 @@
 en:
   spree:
     voucher: "Voucher"
+    voucher_number: "Voucher Number"
     no_voucher_exists_for_number: "No voucher exists for number %{number}"
     unknown_voucher_error: "We encountered a problem applying voucher - Please contact support for more detail"
     unable_to_apply_voucher_with_remaining_balance: "Unable to apply voucher.  Balance: %{available} - Expiration: %{expiration} - Currency: %{currency}"

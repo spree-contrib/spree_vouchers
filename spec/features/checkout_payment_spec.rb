@@ -12,11 +12,31 @@ describe "Checkout/Payment", inaccessible: true do
   let!(:credit_card_payment_method) { create(:credit_card_payment_method, environment: 'test') }
   let!(:voucher_payment_method) { create(:voucher_payment_method) }
 
-  let(:voucher) { create(:voucher, original_amount: 1000000, remaining_amount: 1000000) }
+  let(:voucher) { create(:voucher, original_amount: 10000, remaining_amount: 10000) }
   let(:expired_voucher) { create(:expired_voucher) }
   let(:exhausted_voucher) { create(:exhausted_voucher) }
   let(:authorized_voucher) { create(:authorized_voucher) }
   let(:fully_authorized_voucher) { create(:fully_authorized_voucher) }
+
+  let(:low_balance_voucher1) { create(:voucher, number: 'abcd', original_amount: 1, remaining_amount: 1) }
+  let(:low_balance_voucher2) { create(:voucher, number: 'wxyz', original_amount: 1, remaining_amount: 1) }
+  let(:zero_dollars) { Spree::Money.new(0, { currency: low_balance_voucher1.currency }) }
+  let(:one_dollar) { Spree::Money.new(1, { currency: low_balance_voucher1.currency }) }
+
+  def apply_more_than_one_voucher
+    click_link Spree.t(:use_a_voucher)
+    fill_in 'voucher_number', with: low_balance_voucher1.number
+    click_link Spree.t(:apply_voucher)
+
+    # wait for the order summary to reload
+    find(:xpath, '//tr[@class="summary-order-voucher-detail"][1]/td[1]/strong').should have_content low_balance_voucher1.number
+
+    click_link Spree.t(:use_a_voucher)
+    fill_in 'voucher_number', with: low_balance_voucher2.number
+    click_link Spree.t(:apply_voucher)
+
+    find(:xpath, '//tr[@class="summary-order-voucher-detail"][2]/td[1]/strong').should have_content low_balance_voucher2.number
+  end
 
   after do
     Capybara.ignore_hidden_elements = true
@@ -51,7 +71,7 @@ describe "Checkout/Payment", inaccessible: true do
 
       # the other payment fields should be hidden
       find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
-      find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
+      find("#payment-methods, [data-hook=payment-methods]").visible?.should be_false
 
       click_button Spree.t(:save_and_continue)
       current_path.should == spree.checkout_state_path(:confirm)
@@ -161,106 +181,66 @@ describe "Checkout/Payment", inaccessible: true do
     end
 
     context "redeem multiple vouchers on same order" do
-      let(:voucher1) { create(:voucher, number: 'abcd', original_amount: 1, remaining_amount: 1) }
-      let(:voucher2) { create(:voucher, number: 'wxyz', original_amount: 1, remaining_amount: 1) }
+      before do
+        apply_more_than_one_voucher()
+      end
 
-      let(:zero_dollars) { Spree::Money.new(0, { currency: voucher.currency }) }
-      let(:one_dollar) { Spree::Money.new(1, { currency: voucher.currency }) }
-
-      # I hate that I can't DRY these two below.  I run into timing issues unless I use the page.should have_content's 
-      # and those don't belong in a 'before' (right?)
-
-      # TODO: I NEED HELP with the timing issues here.  the count at the end shows 1, not 2, unless I wait in a pry session
-      pending "updates the order summary with the applied voucher information for each voucher", js: true do
-        # we need to have this here and not in the 'before' due to timing issues
-
-        click_link Spree.t(:use_a_voucher)
-        fill_in 'voucher_number', with: voucher1.number
-        click_link Spree.t(:apply_voucher)
-
-        page.should have_content(Spree.t(:voucher_applied_for_amount_with_remaining_balance, {payment_amount: one_dollar, available: zero_dollars}))
-
-        click_link Spree.t(:use_a_voucher)
-        fill_in 'voucher_number', with: voucher2.number
-        click_link Spree.t(:apply_voucher)
-
-        # we need to have this here and not in the 'before' due to timing issues
-        page.should have_content(Spree.t(:voucher_applied_for_amount_with_remaining_balance, {payment_amount: one_dollar, available: zero_dollars}))
-
+      it "updates the order summary with the applied voucher information for each voucher", js: true do
         page.all(".summary-order-voucher-detail .summary-order-voucher-amount").count.should == 2
       end
 
       it "updates the order summary with the amount still owed", js: true do
-        # we need to have this here and not in the 'before' due to timing issues
-
-        click_link Spree.t(:use_a_voucher)
-        fill_in 'voucher_number', with: voucher1.number
-        click_link Spree.t(:apply_voucher)
-
-        page.should have_content(Spree.t(:voucher_applied_for_amount_with_remaining_balance, {payment_amount: one_dollar, available: zero_dollars}))
-
-        click_link Spree.t(:use_a_voucher)
-        fill_in 'voucher_number', with: voucher2.number
-        click_link Spree.t(:apply_voucher)
-
-        page.should have_content(Spree.t(:voucher_applied_for_amount_with_remaining_balance, {payment_amount: one_dollar, available: zero_dollars}))
-
         find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 2, { currency: voucher.currency }))
       end
     end
+  end # voucher redemption
 
-    context "Removing a voucher from an order" do
-      context "More than one voucher" do
-        let(:voucher1) { create(:voucher, number: 'abcd', original_amount: 1, remaining_amount: 1) }
-        let(:voucher2) { create(:voucher, number: 'wxyz', original_amount: 1, remaining_amount: 1) }
+  context "Removing a voucher from an order" do
+    context "More than one voucher" do
 
-
-        before do
-          click_link Spree.t(:use_a_voucher)
-          fill_in 'voucher_number', with: voucher1.number
-          click_link Spree.t(:apply_voucher)
-
-          click_link Spree.t(:use_a_voucher)
-          fill_in 'voucher_number', with: voucher2.number
-          click_link Spree.t(:apply_voucher)
-
-          find(".summary-order-voucher-detail:eq(0) a").click
-        end
-
-        it "modifies the order total in the order summary", js: true do
-          find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 1, { currency: voucher.currency }))
-        end
-
-        it "removes the removed voucher entry from the order summary", js: true do
-          find(".summary-order-voucher-detail .summary-order-voucher-number:eq(0)").should have_content(voucher2.number)
-          find(".summary-order-voucher-detail .summary-order-voucher-amount").count.should == 1
-        end
+      before do
+        apply_more_than_one_voucher()
+        first(".summary-order-voucher-detail").find("a").click
+        # use the technique listed in the capybara readme (search for: always use the latter!)
+        # in order to wait for the ajax to complete
+        page.should have_no_xpath('//tr[@class="summary-order-voucher-detail"][2]')
       end
 
-      context "Voucher is the only payment" do
-        before do
-          click_link Spree.t(:use_a_voucher)
-          fill_in 'voucher_number', with: voucher.number
-          click_link Spree.t(:apply_voucher)
-          find(".summary-order-voucher-detail a").click
-        end
-
-        it "notifies the user in the flash section", js: true do
-          msg = Spree.t(:voucher_removed_for_amount_with_remaining_balance, 
-                        { payment_amount: Spree::Money.new(@order.total, { currency: voucher.currency }),
-                          available: voucher.reload.authorizable_amount })
-          page.should have_content(msg)
-        end
-
-        it "removes the 'Amount Due' line from the order summary", js: true do
-          page.should_not have_selector "#summary-order-minus-vouchers-total"
-        end
-
-        it "removes the line pertaining to this voucher payment in the order summary", js: true do
-          page.should_not have_selector(".summary-order-voucher-detail .summary-order-voucher-amount")
-        end
+      it "modifies the order total in the order summary", js: true do
+        find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 1, { currency: voucher.currency }))
       end
-      
-    end
-  end
+
+      it "removes the removed voucher entry from the order summary", js: true do
+        find(:xpath, '//tr[@class="summary-order-voucher-detail"][1]/td[1]/strong').should have_content low_balance_voucher2.number
+        page.all(".summary-order-voucher-detail .summary-order-voucher-amount").count.should == 1
+      end
+    end # more than one voucher
+
+    context "Voucher is the only payment" do
+      before do
+        click_link Spree.t(:use_a_voucher)
+        fill_in 'voucher_number', with: voucher.number
+        click_link Spree.t(:apply_voucher)
+        find(".summary-order-voucher-detail a").click
+        page.should have_no_xpath('//tr[@class="summary-order-voucher-detail"][1]')
+      end
+
+      it "notifies the user in the flash section", js: true do
+        msg = Spree.t(:voucher_removed_for_amount_with_remaining_balance, 
+                      { payment_amount: Spree::Money.new(@order.total, { currency: voucher.currency }),
+                        available: Spree::Money.new(voucher.reload.authorizable_amount, { currency: voucher.currency }) })
+
+        page.should have_content(msg)
+      end
+
+      it "removes the 'Amount Due' line from the order summary", js: true do
+        page.should_not have_selector "#summary-order-minus-vouchers-total"
+      end
+
+      it "removes the line pertaining to this voucher payment in the order summary", js: true do
+        page.should_not have_selector(".summary-order-voucher-detail .summary-order-voucher-amount")
+      end
+    end # voucher is the only payment
+    
+  end # removing a voucher
 end
