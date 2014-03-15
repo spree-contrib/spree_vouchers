@@ -24,7 +24,7 @@ module Spree
     # let's always force a confirmation if any of our payment methods support it.
     # vouchers don't meet the 'payment profiles' criteria and I don't want to add that hack
     # into them just for the confirmation step
-    durably_decorate :confirmation_required?, mode: 'strict', sha: '63e6ea9a16bfd8f2ce715265a761d5d4ed9a48dc' do
+    durably_decorate :confirmation_required?, mode: 'soft', sha: '63e6ea9a16bfd8f2ce715265a761d5d4ed9a48dc' do
       Spree::Config[:always_include_confirm_step] ||
         available_payment_methods.any?(&:payment_profiles_supported?) ||
         
@@ -37,14 +37,14 @@ module Spree
     # ok genius, YOU figure out why I get a 'no pending payments' during the execution of
     # checkout_payments_spec:"Voucher Redemption":"paying solely by voucher":it "allows completion without entering other payment"
     # and I'll remove this line...which is only here to make the test pass...which makes me sick
-    durably_decorate :pending_payments, mode: 'strict', sha: '221b0bab98b0dcde509ba39048c34da57d88cfba' do
+    durably_decorate :pending_payments, mode: 'soft', sha: '221b0bab98b0dcde509ba39048c34da57d88cfba' do
       payments.reload.select { |payment| payment.checkout? || payment.pending? }
     end
 
     private
       # TODO - CODE REVIEW - i'm having trouble w/ this durable decorator.  the sha keeps bouncing back and forth.  then it doesn't take effect
       # need to handle zero params coming in when no amount due (due to voucher application)
-      # durably_decorate :update_params_payment_source, mode: 'strict', sha: '78a50dd51923401e19c959485ad1fce2d85d3456' do
+      # durably_decorate :update_params_payment_source, mode: 'soft', sha: '78a50dd51923401e19c959485ad1fce2d85d3456' do
   
       def update_params_payment_source
         # respond_to check is necessary due to issue described in #2910
