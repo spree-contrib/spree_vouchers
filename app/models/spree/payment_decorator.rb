@@ -3,13 +3,15 @@ module Spree
 
     delegate :voucher?, to: :payment_method
 
-    durably_decorate :build_source, mode: 'soft', sha: '40c31bc22daa6cfa240d316c2d0a4f2611048420' do
+    durably_decorate :build_source, mode: 'soft', sha: '47ef2f6111361a3f348ca2d32af92043214498b8' do
       return if source_attributes.nil?
 
       if payment_method && payment_method.payment_source_class == Spree::Voucher
         self.source = Voucher.where(number: source_attributes[:number]).first
       elsif payment_method && payment_method.payment_source_class
         self.source = payment_method.payment_source_class.new(source_attributes)
+        self.source.payment_method_id = payment_method.id
+        self.source.user_id = self.order.user_id if self.order
       end
     end
 
