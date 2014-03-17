@@ -1,7 +1,7 @@
 module Spree
   module Admin
     PaymentsController.class_eval do
-      durably_decorate(:create, mode: 'strict', sha: '516c5fd0879b60140a43b44d48199e97fa73eaa9') do 
+      durably_decorate(:create, mode: 'strict', sha: 'b9a1a623d9c664e88e5bf795f22962c2e49fb7ca') do 
         @payment = @order.payments.build(object_params)
 
         if @payment.payment_method.is_a?(Spree::PaymentMethod::Voucher)
@@ -28,8 +28,8 @@ module Spree
             flash[:error] = Spree.t(:no_voucher_exists_for_number, {number: @payment.source.number})
             render :new and return
           end
-        elsif @payment.payment_method.is_a?(Spree::Gateway) && @payment.payment_method.payment_profiles_supported? && params[:card].present? and params[:card] != 'new'
-          @payment.source = CreditCard.find_by_id(params[:card])
+        elsif params[:card].present? and params[:card] != 'new'
+          @payment.source = @payment.payment_method.payment_source_class.find_by_id(params[:card])
         end
 
         begin
