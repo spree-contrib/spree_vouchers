@@ -1,0 +1,21 @@
+<fieldset>
+  <legend align="center"><%= Spree.t(:voucher) %></legend>
+
+  <div class="row">
+    <div class="alpha six columns">
+      <dl>
+        <dt><%= Spree.t(:voucher_number) %>:</dt>
+        <dd><%= payment.source.number %></dd>
+
+        <dt><%= Spree.t(:voucher_expiration) %>:</dt>
+        <dd><%= payment.source.expiration || Spree.t('no_voucher_expiration_applicable') %></dd>
+
+        <dt><%= Spree.t(:payment_amount) %>:</dt>
+        <dd><%= Spree::Money.new(payment.amount, {currency: payment.order.currency}) %></dd>
+
+        <dt><%= Spree.t(:voucher_remaining_amount) %>:</dt>
+        <dd><%= Spree::Money.new(payment.source.authorizable_amount, {currency: payment.source.currency}) %></dd>
+      </dl>
+    </div>
+  </div>
+</fieldset>

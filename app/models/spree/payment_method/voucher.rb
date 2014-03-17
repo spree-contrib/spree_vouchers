@@ -18,10 +18,6 @@ module Spree
       end
     end
 
-    def actions
-      %w{authorize capture void credit}
-    end
-
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
       ['checkout', 'pending'].include?(payment.state)
@@ -73,9 +69,18 @@ module Spree
       handle_action(action,:credit, auth_code)
     end
 
-
     def source_required?
       true
+    end
+
+    # this is smelly.  IMO there's a 'bug' in spree in the admin payment view.
+    # https://github.com/spree/spree/blob/2-2-stable/backend/app/views/spree/admin/payments/_form.html.erb#L29
+    # Whey are we asking about sources with profile
+    # If we upgrade spree we'll need to override this instead: def sources_with_profile(order)
+    
+    # I filed: https://github.com/spree/spree/issues/4450
+    def sources_by_order(order)
+      nil
     end
 
     private

@@ -1,4 +1,10 @@
 en:
+  activerecord:
+    attributes:
+      spree/voucher:
+        currency: Currency
+        number: Number
+        original_amount: Original Aamount
   spree:
     voucher: "Voucher"
     voucher_number: "Voucher Number"

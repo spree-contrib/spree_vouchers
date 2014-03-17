@@ -104,6 +104,10 @@ module Spree
       end
     end
 
+    def actions
+      %w{capture void credit}
+    end
+
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
       payment.pending? || payment.checkout?

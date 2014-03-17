@@ -14,7 +14,7 @@ module Spree
     end
 
     def voucher_total
-      (self.payments.select { |p| p.voucher? && (p.pending? || p.checkout?)}.map(&:amount)).sum
+      (self.payments.select { |p| p.persisted? && p.voucher? && (p.pending? || p.checkout?)}.map(&:amount)).sum
     end
 
     def total_minus_pending_vouchers
