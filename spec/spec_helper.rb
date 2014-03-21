@@ -29,6 +29,7 @@ require 'spree/testing_support/controller_requests'
 require 'spree/testing_support/authorization_helpers'
 require 'spree/testing_support/url_helpers'
 require 'spree/testing_support/order_walkthrough'
+require 'spree/testing_support/capybara_ext'
 
 # Requires factories defined in lib/spree_vouchers/factories.rb
 require 'spree_vouchers/factories'
