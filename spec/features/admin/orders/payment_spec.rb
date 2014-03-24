@@ -5,7 +5,7 @@ describe "Payments" do
   stub_authorization!
 
   let!(:voucher_payment_method) { create(:voucher_payment_method) }
-  let!(:voucher) { create(:voucher, number: '1234', original_amount: 10000, remaining_amount: 10000) }
+  let!(:voucher) { create(:voucher, number: '1234', original_amount: 10000) }
 
   context "with a pre-existing payment" do
     let!(:order) { create(:completed_order_with_totals, number: 'R100') }

@@ -5,7 +5,7 @@ describe Spree::PaymentMethod::Voucher do
   let (:gateway_options) {
     create(:payment, 
            order: create(:order, 
-                         currency: create(:voucher).currency)
+                         currency: build(:voucher).currency)
           ).gateway_options
   }
 

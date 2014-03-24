@@ -1,7 +1,9 @@
 SpreeVouchers
 =============
 
-Introduction goes here.
+https://www.codeship.io/projects/592544d0-9592-0131-ced3-1619ce81f0d2/status
+
+Spree Vouchers implemented as 1st-class payment method
 
 Installation
 ------------

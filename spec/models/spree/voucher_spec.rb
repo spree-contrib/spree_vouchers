@@ -16,13 +16,15 @@ describe Spree::Voucher do
       voucher.authorize(100000, voucher.currency).should be_false
     end
     it "disallows fully authorized vouchers" do
-      fully_authorized_voucher.authorize(1, voucher.currency).should be_false
+      puts "numbers1: #{Spree::Voucher.all.map(&:number)}"
+      fully_authorized_voucher.authorize(1, fully_authorized_voucher.currency).should be_false
     end
     it "disallows exhausted vouchers" do
-      exhausted_voucher.authorize(1, voucher.currency).should be_false
+      puts "numbers2: #{Spree::Voucher.all.map(&:number)}"
+      exhausted_voucher.authorize(1, exhausted_voucher.currency).should be_false
     end
     it "disallows expired vouchers" do
-      expired_voucher.authorize(1, voucher.currency).should be_false
+      expired_voucher.authorize(1, expired_voucher.currency).should be_false
     end
     it "allows vouchers with no expiration date" do
       voucher.update_attributes(expiration: nil)
@@ -88,9 +90,8 @@ describe Spree::Voucher do
     end
 
     # assuming that auth was successful and we took too long to ship
-    # TODO: CODE REVIEW - i'm thinking that it was valid on auth, and if we take a week to ship, it's not their fault..correct?
     it "allows capture on an expired vouchers" do 
-      expired_voucher.authorized_amount = 1
+      authorized_voucher.update_column(:expiration, 1.minute.ago)
       authorized_voucher.capture(1, @auth_code, authorized_voucher.currency)
       authorized_voucher.should have(0).errors
     end
@@ -198,6 +199,8 @@ describe Spree::Voucher do
 
   end
 
+  # I'm thinking that this whole section is irrelevant as payments are individually manipulated
+  # in the admin app.  TODO: discuss
   context "Refunds" do
     context "expired voucher" do
       pending "it behaves however we decide it behaves"

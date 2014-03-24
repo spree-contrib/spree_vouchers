@@ -3,10 +3,11 @@ module Spree
     has_many :payments, as: :source
     has_many :voucher_events
 
-    validates :number, :original_amount, :currency, presence: true
-    validates :number, uniqueness: true
+    before_validation(on: :create) { self.remaining_amount = original_amount }
 
-    before_create :set_remaining_amount
+    validates :number, :original_amount, :currency, presence: true
+    validates :remaining_amount, :numericality => { :less_than_or_equal_to => :original_amount }
+    validates :number, uniqueness: true
 
     def authorize(amount, order_currency)
       if soft_authorize(amount, order_currency)
@@ -142,10 +143,6 @@ module Spree
         end
         code = random
         code
-      end
-
-      def set_remaining_amount
-        self.remaining_amount ||= original_amount
       end
   end
 end

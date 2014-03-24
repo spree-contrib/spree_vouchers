@@ -8,7 +8,6 @@ FactoryGirl.define do
     number '12341234abcdefg'
     expiration 1.year.from_now
     original_amount 25.00
-    remaining_amount 25.00
     currency 'USD'
 
     factory :authorized_voucher do
@@ -19,17 +18,16 @@ FactoryGirl.define do
       }
 
       factory :partially_captured_voucher do
-        remaining_amount 5
 
         after(:create) { |v| 
+          v.update_column(:remaining_amount, 5.00)
           v.voucher_events.create!(action: 'capture', amount: 5, authorization_code: v.number)
         }
       end
 
       factory :captured_voucher do
-        remaining_amount 0
-
         after(:create) { |v| 
+          v.update_column(:remaining_amount, 0.00)
           v.voucher_events.create!(action: 'capture', amount: 10, authorization_code: v.number)
         }
       end
@@ -38,12 +36,16 @@ FactoryGirl.define do
 
     factory :expired_voucher  do
       expiration 1.second.ago
-      remaining_amount 5
+      after(:create) { |v| 
+        v.update_column(:remaining_amount, 5.00)
+      }
     end
 
     # auths and captures should fail
     factory :exhausted_voucher do
-      remaining_amount 0
+      after(:create) { |v| 
+        v.update_column(:remaining_amount, 0.00)
+      }
     end
 
     # auths should fail

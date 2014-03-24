@@ -12,14 +12,14 @@ describe "Checkout/Payment", inaccessible: true do
   let!(:credit_card_payment_method) { create(:credit_card_payment_method, environment: 'test') }
   let!(:voucher_payment_method) { create(:voucher_payment_method) }
 
-  let(:voucher) { create(:voucher, original_amount: 10000, remaining_amount: 10000) }
+  let(:voucher) { create(:voucher, original_amount: 10000) }
   let(:expired_voucher) { create(:expired_voucher) }
   let(:exhausted_voucher) { create(:exhausted_voucher) }
   let(:authorized_voucher) { create(:authorized_voucher) }
   let(:fully_authorized_voucher) { create(:fully_authorized_voucher) }
 
-  let(:low_balance_voucher1) { create(:voucher, number: 'abcd', original_amount: 1, remaining_amount: 1) }
-  let(:low_balance_voucher2) { create(:voucher, number: 'wxyz', original_amount: 1, remaining_amount: 1) }
+  let(:low_balance_voucher1) { create(:voucher, number: 'abcd', original_amount: 1) }
+  let(:low_balance_voucher2) { create(:voucher, number: 'wxyz', original_amount: 1) }
   let(:zero_dollars) { Spree::Money.new(0, { currency: low_balance_voucher1.currency }) }
   let(:one_dollar) { Spree::Money.new(1, { currency: low_balance_voucher1.currency }) }
 
@@ -30,7 +30,6 @@ describe "Checkout/Payment", inaccessible: true do
 
     # wait for the order summary to reload
     find(:xpath, '//tr[@class="summary-order-voucher-detail"][1]/td[1]/strong').should have_content low_balance_voucher1.number
-
     click_link Spree.t(:use_a_voucher)
     fill_in 'voucher_number', with: low_balance_voucher2.number
     click_link Spree.t(:apply_voucher)
@@ -154,22 +153,20 @@ describe "Checkout/Payment", inaccessible: true do
     end
 
     it "updates the order summary with the applied voucher information", js: true do
-      voucher.update_attributes(original_amount: 1, remaining_amount: 1)
       click_link Spree.t(:use_a_voucher)
-      fill_in 'voucher_number', with: voucher.number
+      fill_in 'voucher_number', with: low_balance_voucher1.number
       click_link Spree.t(:apply_voucher)
 
-      find(".summary-order-voucher-detail .summary-order-voucher-amount").should have_content(Spree::Money.new(1, { currency: voucher.currency }))
+      find(".summary-order-voucher-detail .summary-order-voucher-amount").should have_content(Spree::Money.new(1, { currency: low_balance_voucher1.currency }))
     end
 
     it "updates the order summary with the amount still owed", js: true do
-      voucher.update_attributes(original_amount: 1, remaining_amount: 1)
       click_link Spree.t(:use_a_voucher)
-      fill_in 'voucher_number', with: voucher.number
+      fill_in 'voucher_number', with: low_balance_voucher1.number
       click_link Spree.t(:apply_voucher)
 
       # the 'Amount Due' should now show the updated total
-      find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 1, { currency: voucher.currency }))
+      find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(@order.total - 1, { currency: low_balance_voucher1.currency }))
     end
 
     it "handles payment after a failed voucher application", js: true do
