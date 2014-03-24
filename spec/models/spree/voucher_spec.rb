@@ -16,11 +16,9 @@ describe Spree::Voucher do
       voucher.authorize(100000, voucher.currency).should be_false
     end
     it "disallows fully authorized vouchers" do
-      puts "numbers1: #{Spree::Voucher.all.map(&:number)}"
       fully_authorized_voucher.authorize(1, fully_authorized_voucher.currency).should be_false
     end
     it "disallows exhausted vouchers" do
-      puts "numbers2: #{Spree::Voucher.all.map(&:number)}"
       exhausted_voucher.authorize(1, exhausted_voucher.currency).should be_false
     end
     it "disallows expired vouchers" do

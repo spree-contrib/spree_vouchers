@@ -5,6 +5,7 @@ en:
         currency: Currency
         number: Number
         original_amount: Original Aamount
+        expiration: Expiration
   spree:
     voucher: "Voucher"
     voucher_number: "Voucher Number"
