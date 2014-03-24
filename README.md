@@ -19,6 +19,19 @@ bundle
 bundle exec rails g spree_vouchers:install
 ```
 
+To create some sample vouchers:
+
+```shell
+bundle exec rake spree_vouchers:load_sample
+```
+
+This creates four vouchers (with the following numbers:
+
+VALID
+EXPIRED
+FULLY_AUTHED
+EXHAUSTED
+
 Testing
 -------
 
