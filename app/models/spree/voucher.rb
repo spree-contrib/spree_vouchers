@@ -3,7 +3,9 @@ module Spree
     has_many :payments, as: :source
     has_many :voucher_events
 
+    belongs_to :line_item
     before_validation(on: :create) { self.remaining_amount = original_amount }
+    before_validation :generate_voucher_number, on: :create
 
     validates :number, :original_amount, :currency, presence: true
     validates :remaining_amount, :numericality => { :less_than_or_equal_to => :original_amount }
@@ -144,5 +146,16 @@ module Spree
         code = random
         code
       end
+
+      def generate_voucher_number
+        record = true
+        while record
+          random = "V#{Array.new(9){rand(9)}.join}"
+          record = self.class.where(number: random).first
+        end
+        self.number = random if self.number.blank?
+        self.number
+      end
+  
   end
 end
