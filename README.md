@@ -1,7 +1,9 @@
 SpreeVouchers
 =============
 
-https://www.codeship.io/projects/592544d0-9592-0131-ced3-1619ce81f0d2/status
+[ ![Codeship Status for spree-contrib/spree_vouchers](https://www.codeship.io/projects/592544d0-9592-0131-ced3-1619ce81f0d2/status?branch=master)](https://www.codeship.io/projects/592544d0-9592-0131-ced3-1619ce81f0d2)
+
+
 
 Spree Vouchers implemented as 1st-class payment method
 
