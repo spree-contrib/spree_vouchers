@@ -13,26 +13,26 @@ describe Spree::Voucher do
       expect { voucher.authorize(1, voucher.currency) }.to change{voucher.authorized_amount}.from(voucher.authorized_amount).to(voucher.authorized_amount + 1)
     end
     it "allows no more than available" do
-      voucher.authorize(100000, voucher.currency).should be_false
+      voucher.authorize(100000, voucher.currency).should be false
     end
     it "disallows fully authorized vouchers" do
-      fully_authorized_voucher.authorize(1, fully_authorized_voucher.currency).should be_false
+      fully_authorized_voucher.authorize(1, fully_authorized_voucher.currency).should be false
     end
     it "disallows exhausted vouchers" do
-      exhausted_voucher.authorize(1, exhausted_voucher.currency).should be_false
+      exhausted_voucher.authorize(1, exhausted_voucher.currency).should be false
     end
     it "disallows expired vouchers" do
-      expired_voucher.authorize(1, expired_voucher.currency).should be_false
+      expired_voucher.authorize(1, expired_voucher.currency).should be false
     end
     it "allows vouchers with no expiration date" do
       voucher.update_attributes(expiration: nil)
-      voucher.authorize(1, voucher.currency).should be_true
+      voucher.authorize(1, voucher.currency).should be_truthy
     end
     it "returns true on success" do
-      voucher.authorize(1, voucher.currency).should be_true
+      voucher.authorize(1, voucher.currency).should be_truthy
     end
     it "rejects a voucher not matching the order currency" do
-      voucher.authorize(1, 'EUR').should be_false
+      voucher.authorize(1, 'EUR').should be false
     end
   end
 
@@ -201,35 +201,35 @@ describe Spree::Voucher do
   # in the admin app.  TODO: discuss
   context "Refunds" do
     context "expired voucher" do
-      pending "it behaves however we decide it behaves"
+      skip "it behaves however we decide it behaves"
     end
 
     context "order fully paid by voucher" do
-      pending "adds the full order balance back on to the voucher"
+      skip "adds the full order balance back on to the voucher"
     end
 
     context "order partially paid by voucher" do
 
       context "refund is less than the amount paid on voucher" do
-        pending "adds the refund amount back to the voucher"
-        pending "does not affect the credit card"
+        skip "adds the refund amount back to the voucher"
+        skip "does not affect the credit card"
       end
 
       context "refund exceeds the amount paid on voucher(s)" do
-        pending "adds the amount paid back to the voucher"
+        skip "adds the amount paid back to the voucher"
         
         context "single voucher" do
-          pending "adds the remainder to the credit card"
+          skip "adds the remainder to the credit card"
         end
         context "multiple vouchers" do
-          pending "Jeff is thinking: pick the highest one first, try to completely refill it, then move on the the next"
+          skip "Jeff is thinking: pick the highest one first, try to completely refill it, then move on the the next"
           context "first voucher can hold the remaining amount" do
-            pending "One highest-valued voucher has its balance adjusted by the refund amount"
+            skip "One highest-valued voucher has its balance adjusted by the refund amount"
           end
 
           context "first voucher can not hold the remaining amount" do
-            pending "The highest-valued voucher has its balance adjusted the original 'max' voucher amount"
-            pending "The next-highest-valued voucher has its balance adjusted for the remaining amount"
+            skip "The highest-valued voucher has its balance adjusted the original 'max' voucher amount"
+            skip "The next-highest-valued voucher has its balance adjusted for the remaining amount"
           end
 
         end

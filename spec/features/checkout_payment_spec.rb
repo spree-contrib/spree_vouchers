@@ -75,18 +75,20 @@ describe "Checkout/Payment", inaccessible: true do
         # this is just to force 'wait'
         find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
 
-        find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be_false
-        find("#payment-methods, [data-hook=payment-methods]").visible?.should be_false
-        find("#voucher_usage").visible?.should be_false
+        find("#payment-method-fields, [data-hook=payment-method-fields]").visible?.should be false
+        find("#payment-methods, [data-hook=payment-methods]").visible?.should be false
+        find("#voucher_usage").visible?.should be false
       end
 
       it "allows completion without entering other payment", js: true do
         # this is just to force 'wait'
         find("#summary-order-minus-vouchers-total").should have_content(Spree::Money.new(0, { currency: voucher.currency }))
-
         click_button Spree.t(:save_and_continue)
+
+        @order.payments.reload # I'm not happy about this either :-(
         click_button Spree.t(:place_order)
-        current_path.start_with?(spree.order_path(@order.number)).should be_true
+
+        current_path.start_with?(spree.order_path(@order.number)).should be true
       end
 
       it "clears the voucher number from the entry form", js: true do
@@ -105,7 +107,7 @@ describe "Checkout/Payment", inaccessible: true do
 
       click_button Spree.t(:save_and_continue)
       click_button Spree.t(:place_order)
-      current_path.start_with?(spree.order_path(@order.number)).should be_true
+      current_path.start_with?(spree.order_path(@order.number)).should be true
     end
 
     it "gracefully handles fully-authorized vouchers", js: true do
@@ -182,7 +184,7 @@ describe "Checkout/Payment", inaccessible: true do
 
       click_button Spree.t(:save_and_continue)
       click_button Spree.t(:place_order)
-      current_path.start_with?(spree.order_path(@order.number)).should be_true
+      current_path.start_with?(spree.order_path(@order.number)).should be true
     end
 
     it "should support paying without a voucher even after clicking 'use a voucher'", js: true do
@@ -195,7 +197,7 @@ describe "Checkout/Payment", inaccessible: true do
 
       click_button Spree.t(:save_and_continue)
       click_button Spree.t(:place_order)
-      current_path.start_with?(spree.order_path(@order.number)).should be_true
+      current_path.start_with?(spree.order_path(@order.number)).should be true
     end
 
     context "redeem multiple vouchers on same order" do
@@ -269,7 +271,7 @@ describe "Checkout/Payment", inaccessible: true do
       end
 
       it "always shows the 'use a voucher' option after removal", js: true do
-        find("#voucher_usage").visible?.should be_true
+        find("#voucher_usage").visible?.should be true
       end
     end # voucher is the only payment
     

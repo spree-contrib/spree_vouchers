@@ -13,28 +13,28 @@ describe Spree::PaymentMethod::Voucher do
     it "declines an unknown voucher" do
       Spree::Voucher.all.map(&:destroy)
       resp = subject.authorize(100, Spree::Voucher.new(number: '1234', remaining_amount: 100000), gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include 'Could not find voucher'
     end
 
     it "declines a voucher with insuffient funds" do
       voucher = create(:voucher)
       resp = subject.authorize((voucher.remaining_amount * 100) + 1, Spree::Voucher.new(number: voucher.number), gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Insufficient funds for voucher"
     end
 
     it "declines an expired voucher" do
       voucher = create(:expired_voucher)
       resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Expired voucher"
     end
 
     it "declines a voucher not matching the order currency" do
       voucher = create(:voucher, currency: 'AUD')
       resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Currency mismatch"
     end
 
@@ -42,7 +42,7 @@ describe Spree::PaymentMethod::Voucher do
     it "allows a voucher having no expiration" do
       voucher = create(:voucher, expiration: nil)
       resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
-      resp.success?.should be_true
+      resp.success?.should be true
       resp.authorization.should_not be_nil
     end
 
@@ -50,7 +50,7 @@ describe Spree::PaymentMethod::Voucher do
       voucher = create(:voucher)
       resp = subject.authorize((voucher.remaining_amount * 100) - 1, Spree::Voucher.new(number: voucher.number), gateway_options)
 
-      resp.success?.should be_true
+      resp.success?.should be true
       resp.authorization.should_not be_nil
     end
   end
@@ -58,7 +58,7 @@ describe Spree::PaymentMethod::Voucher do
   context "capture" do
     it "declines an unknown voucher" do
       resp = subject.capture(100, 1, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include 'Could not find voucher'
     end
 
@@ -68,14 +68,14 @@ describe Spree::PaymentMethod::Voucher do
 
       voucher.update_attributes(remaining_amount: voucher.authorized_amount - 1)
       resp = subject.capture((voucher.authorized_amount * 100), auth_code, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Authorized amount is greater than the remaining amount!"
     end
 
     it "declines a voucher with a requested amount greater than the authorized amount" do
       voucher = create(:authorized_voucher)
       resp = subject.capture((voucher.authorized_amount * 100) + 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Attempting to capture more than the Authorized amount!"
     end
 
@@ -83,7 +83,7 @@ describe Spree::PaymentMethod::Voucher do
       voucher = create(:authorized_voucher, currency: 'AUD')
       resp = subject.capture((voucher.authorized_amount * 100) - 1, voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
 
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include "Currency mismatch"
     end
 
@@ -91,7 +91,7 @@ describe Spree::PaymentMethod::Voucher do
       voucher = create(:authorized_voucher)
       resp = subject.capture((voucher.authorized_amount * 100), voucher.voucher_events.where(action: 'authorize').first.authorization_code, gateway_options)
 
-      resp.success?.should be_true
+      resp.success?.should be true
       resp.message.should include "Successful voucher capture"
     end
   end
@@ -99,7 +99,7 @@ describe Spree::PaymentMethod::Voucher do
   context "void" do
     it "declines an unknown voucher" do
       resp = subject.void(1)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include 'Could not find voucher'
     end
 
@@ -112,7 +112,7 @@ describe Spree::PaymentMethod::Voucher do
       voucher.stub(void: nil)
 
       resp = subject.void(auth_code, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
     end
 
     it "voids a valid voucher void request" do
@@ -121,7 +121,7 @@ describe Spree::PaymentMethod::Voucher do
       auth_code = voucher.voucher_events.where(action: 'authorize').first.authorization_code
 
       resp = subject.void(auth_code)
-      resp.success?.should be_true
+      resp.success?.should be true
       resp.message.should include "Successful voucher void"
     end
 
@@ -130,7 +130,7 @@ describe Spree::PaymentMethod::Voucher do
   context "credit" do
     it "declines an unknown voucher" do
       resp = subject.credit(100, 1, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
       resp.message.should include 'Could not find voucher'
     end
 
@@ -143,7 +143,7 @@ describe Spree::PaymentMethod::Voucher do
       voucher.stub(credit: nil)
 
       resp = subject.credit(100000000, auth_code, gateway_options)
-      resp.success?.should be_false
+      resp.success?.should be false
     end
 
     it "declines a voucher not matching the order currency" do
@@ -163,7 +163,7 @@ describe Spree::PaymentMethod::Voucher do
       auth_code = voucher.voucher_events.where(action: 'authorize').first.authorization_code
 
       resp = subject.credit(1, auth_code, gateway_options)
-      resp.success?.should be_true
+      resp.success?.should be true
       resp.message.should include "Successful voucher credit"
     end
 
