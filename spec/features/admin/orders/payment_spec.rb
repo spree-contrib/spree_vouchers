@@ -42,13 +42,13 @@ describe "Payments" do
                )
       end
 
-      pending "why isn't my icon visible???? capturing a voucher payment from a new order" do
+      skip "why isn't my icon visible???? capturing a voucher payment from a new order" do
         click_icon(:capture)
         page.should_not have_content('Cannot perform requested operation')
         page.should have_content('Payment Updated')
       end
 
-      pending "why isn't my icon visible???? voids a voucher payment from a new order" do
+      skip "why isn't my icon visible???? voids a voucher payment from a new order" do
         click_icon(:void)
         page.should have_content('Payment Updated')
       end

@@ -63,35 +63,35 @@ describe Spree::Voucher do
 
     it "captures the authorized amount" do
       authorized_voucher.capture(10,@auth_code, authorized_voucher.currency)
-      authorized_voucher.should have(0).errors
+      expect(authorized_voucher.errors.size).to eq(0)
     end
 
     it "captures less than the authorized amount" do
       authorized_voucher.capture(9,@auth_code, authorized_voucher.currency)
-      authorized_voucher.should have(0).errors
+      expect(authorized_voucher.errors.size).to eq(0)
     end
 
     it "disallows capturing more than the authorized amount" do
       authorized_voucher.capture(11,@auth_code, authorized_voucher.currency)
-      authorized_voucher.should have(1).errors
+      expect(authorized_voucher.errors.size).to eq(1)
     end
 
     it "disallows capturing when the authorized amount is less than the amount but the remaining is amount is less than the authorized amount" do
       authorized_voucher.remaining_amount = authorized_voucher.authorized_amount - 1
       authorized_voucher.capture(authorized_voucher.authorized_amount, @auth_code, authorized_voucher.currency)
-      authorized_voucher.should have(1).errors
+      expect(authorized_voucher.errors.size).to eq(1)
     end
 
     it "rejects a voucher not matching the order currency" do
       authorized_voucher.capture(10,@auth_code, 'EUR')
-      authorized_voucher.should have(1).errors
+      expect(authorized_voucher.errors.size).to eq(1)
     end
 
     # assuming that auth was successful and we took too long to ship
     it "allows capture on an expired vouchers" do 
       authorized_voucher.update_column(:expiration, 1.minute.ago)
       authorized_voucher.capture(1, @auth_code, authorized_voucher.currency)
-      authorized_voucher.should have(0).errors
+      expect(authorized_voucher.errors.size).to eq(0)
     end
   end
 
@@ -187,12 +187,12 @@ describe Spree::Voucher do
 
     it "denies a credit that puts us above the original value" do
       @voucher.credit(100000, @voucher_event.authorization_code, @voucher.currency)
-      @voucher.should have(1).errors
+      expect(@voucher.errors.size).to eq(1)
     end
 
     it "rejects a voucher not matching the order currency" do
       @voucher.credit(1, @voucher_event.authorization_code, 'EUR')
-      @voucher.should have(1).errors
+      expect(@voucher.errors.size).to eq(1)
     end
 
   end
