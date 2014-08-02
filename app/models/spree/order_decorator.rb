@@ -21,6 +21,9 @@ module Spree
       total - voucher_total
     end
 
+    Spree::Order.state_machine.after_transition  :to => :complete, :do => :activate_vouchers
+    Spree::Order.state_machine.after_transition  :to => :canceled, :do => :deactivate_vouchers
+
     # let's always force a confirmation if any of our payment methods support it.
     # vouchers don't meet the 'payment profiles' criteria and I don't want to add that hack
     # into them just for the confirmation step
@@ -40,5 +43,22 @@ module Spree
     durably_decorate :pending_payments, mode: 'soft', sha: '221b0bab98b0dcde509ba39048c34da57d88cfba' do
       payments.reload.select { |payment| payment.checkout? || payment.pending? }
     end
+
+    def vouchers
+      line_items.map(&:vouchers).flatten
+    end
+
+    private
+      def deactivate_vouchers
+        vouchers.each do |voucher|
+          voucher.update_attributes(active: false)
+        end
+      end
+
+      def activate_vouchers
+        vouchers.each do |voucher|
+          voucher.update_attributes(active: true)
+        end
+      end
   end
 end

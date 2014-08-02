@@ -2,7 +2,7 @@ module Spree
   class Voucher < ActiveRecord::Base
     has_many :payments, as: :source
     has_many :voucher_events
-
+    belongs_to :address
     belongs_to :line_item
     before_validation(on: :create) { self.remaining_amount = original_amount }
     before_validation :generate_voucher_number, on: :create
@@ -10,6 +10,20 @@ module Spree
     validates :number, :original_amount, :currency, presence: true
     validates :remaining_amount, :numericality => { :less_than_or_equal_to => :original_amount }
     validates :number, uniqueness: true
+
+    scope :created_between, ->(start_date, end_date) { where(created_at: start_date..end_date) }
+
+    def address
+      if self[:address_id]
+        return Address.find self[:address_id]
+      else
+        return line_item.order.ship_address
+      end
+    end
+
+    def order
+      line_item.try(:order)
+    end
 
     def authorize(amount, order_currency)
       if soft_authorize(amount, order_currency)
@@ -25,17 +39,22 @@ module Spree
     def soft_authorize(amount, order_currency)
       Rails.logger.debug "#{amount} - #{order_currency} - #{remaining_amount} - #{authorizable_amount} - #{self.number}"
 
-      if authorizable_amount <  amount
+      if !active?
+        errors.add(:base, "Inactive voucher")
+      elsif authorizable_amount <  amount
         errors.add(:base,"Insufficient funds for voucher: #{self.number}")
       elsif expiration && expiration <= Time.now
         errors.add(:base,"Expired voucher: #{self.number}")
       elsif currency != order_currency
         errors.add(:base,"Currency mismatch: Your order has currency: #{order_currency} but voucher #{self.number} has currency #{self.currency}")
       end
+
       return errors.blank?
     end
 
     def capture(amount, authorization_code, order_currency)
+      errors.add(:base, "Inactive voucher") and return false unless active?
+
       if (amount <= authorized_amount)
         # this is a data integrity problem.  Should never occur (unless we race-condition 2 auths then 1 capture)
         if amount > remaining_amount 
@@ -60,6 +79,8 @@ module Spree
     end
 
     def void(authorization_code)
+      errors.add(:base, "Inactive voucher") and return false unless active?
+
       # find the amount related to this authorization_code.  That's how much we'll put back on the voucher
       auth_event    = self.voucher_events.where(action: 'authorize').where(authorization_code: authorization_code).first rescue nil
       capture_event = self.voucher_events.where(action: 'capture').where(authorization_code: authorization_code).first rescue nil
@@ -94,6 +115,8 @@ module Spree
     def credit(amount, authorization_code, order_currency)
       # TODO: CODE REVIEW - i'm enforcing that you can't credit more than the capture amount - correct behavior?
 
+      errors.add(:base, "Inactive voucher") and return false unless active?
+
       # find the amount related to this authorization_code.  That's how much we'll put back on the voucher
       capture_event = self.voucher_events.where(action: 'capture').where(authorization_code: authorization_code).first rescue nil
 
@@ -116,12 +139,12 @@ module Spree
 
     # Indicates whether its possible to capture the payment
     def can_capture?(payment)
-      payment.pending? || payment.checkout?
+      active? && (payment.pending? || payment.checkout?)
     end
 
     # Indicates whether its possible to void the payment.
     def can_void?(payment)
-      !payment.void?
+      active? && !payment.void? # if it's not an active voucher, that means it's no longer part of a 'complete' order (it wasn't paid for or canceled)
     end
 
     # Indicates whether its possible to credit the payment.  Note that most gateways require that the
@@ -129,6 +152,7 @@ module Spree
     def can_credit?(payment)
       return false unless payment.completed?
       return false unless payment.order.payment_state == 'credit_owed'
+      return false unless active? 
       payment.credit_allowed > 0
     end
 

@@ -7,11 +7,7 @@
 ============================================================
 <% @shipment.manifest.each do |item| %>
   <%= item.variant.sku %> <%= item.variant.product.name %> <%= item.variant.options_text %>
-  <% item.line_item.vouchers.each do |voucher| %>
-    <%= "#{Spree.t(:voucher_number)}: #{voucher.number}, \
-         #{I18n.t(:expiration, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.expiration}, \
-         #{I18n.t(:currency, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.currency}" %>
-  <% end %>
+  <%= render partial: 'spree/shared/voucher_email_vouchers', locals: {vouchers: item.line_item.vouchers.select {|v| v.delivery_method == 'email'}} %>
 <% end %>
 
 ============================================================

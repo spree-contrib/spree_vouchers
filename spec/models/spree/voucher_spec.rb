@@ -8,7 +8,36 @@ describe Spree::Voucher do
   let(:fully_authorized_voucher) { create(:fully_authorized_voucher) }
   let(:voucher_payment_method) { create(:voucher_payment_method) }
 
+  context "creation" do
+    before do
+      @address = FactoryGirl.create(:address)
+    end
+
+    it "uses the order shipping address by default" do
+      order = voucher.line_item.order
+      order.ship_address = @address
+      order.save!
+      
+      voucher.address.should == order.ship_address
+    end
+    it "uses the voucher address when provided" do
+      voucher.address= @address
+      voucher.save!
+      voucher.address.should == @address
+    end
+  end
+
   context "authorize" do
+    it "rejects inactive vouchers" do
+      voucher.update_attributes(active: false)
+      expect { voucher.authorize(1, voucher.currency) }.to_not change{ voucher.authorized_amount }
+    end
+
+    it "allows active vouchers" do
+      voucher.update_attributes(active: true)
+      expect { voucher.authorize(1, voucher.currency) }.to change{ voucher.authorized_amount }
+    end
+
     it "adjusts the authorized amount" do
       expect { voucher.authorize(1, voucher.currency) }.to change{voucher.authorized_amount}.from(voucher.authorized_amount).to(voucher.authorized_amount + 1)
     end
@@ -39,6 +68,16 @@ describe Spree::Voucher do
   context "capture" do
     before do
       @auth_code = authorized_voucher.voucher_events.first.authorization_code
+    end
+
+    it "rejects inactive vouchers" do
+      authorized_voucher.update_attributes(active: false)
+      expect { authorized_voucher.capture(1,@auth_code, authorized_voucher.currency) }.to_not change{ authorized_voucher.authorized_amount }
+    end
+
+    it "allows active vouchers" do
+      authorized_voucher.update_attributes(active: true)
+      expect { authorized_voucher.capture(1,@auth_code, authorized_voucher.currency) }.to change{ authorized_voucher.authorized_amount }
     end
 
     it "adjusts the authorized amount upon successful capture" do
@@ -148,6 +187,16 @@ describe Spree::Voucher do
         @capture_voucher_event = @voucher.voucher_events.where(action: 'capture').first
       end
 
+      it "rejects inactive vouchers" do
+        @voucher.update_attributes(active: false)
+        expect { @voucher.void(@auth_voucher_event.authorization_code) }.to_not change{@voucher.authorized_amount}
+      end
+
+      it "allows active vouchers" do
+        @voucher.update_attributes(active: true)
+        expect { @voucher.void(@auth_voucher_event.authorization_code) }.to change{@voucher.authorized_amount}
+      end
+
       it "de-authorizes the full authorized amount (for this auth code)" do
         expect { @voucher.void(@auth_voucher_event.authorization_code) }.
           to change{@voucher.authorized_amount}.
@@ -168,6 +217,18 @@ describe Spree::Voucher do
     before do
       @voucher = create(:captured_voucher)
       @voucher_event = @voucher.voucher_events.where(action: 'capture').first
+    end
+
+    it "rejects inactive vouchers" do
+      @voucher.update_attributes(active: false)
+      expect { @voucher.credit(1, @voucher_event.authorization_code, @voucher.currency) }.
+        to_not change{@voucher.remaining_amount}
+    end
+
+    it "allows active vouchers" do
+      @voucher.update_attributes(active: true)
+      expect { @voucher.credit(1, @voucher_event.authorization_code, @voucher.currency) }.
+        to change{@voucher.remaining_amount}
     end
 
     it "does not affect the authorized amount" do

@@ -1,0 +1,8 @@
+   <% vouchers.each do |voucher| %>
+    <%= "#{Spree.t(:voucher_number)}: #{voucher.number}, \
+         #{I18n.t(:voucher_from, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.voucher_from}, \
+         #{I18n.t(:voucher_to, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.voucher_to}, \
+         #{I18n.t(:message, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.message}, \
+         #{I18n.t(:expiration, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.expiration}, \
+         #{I18n.t(:currency, scope: 'activerecord.attributes.spree/voucher')}: #{voucher.currency}" %>
+  <% end %>

@@ -6,6 +6,9 @@ en:
         number: Number
         original_amount: Original Aamount
         expiration: Expiration
+        voucher_from: From
+        voucher_to: To
+        message: Message
   spree:
     voucher: "Voucher"
     voucher_number: "Voucher Number"
@@ -20,3 +23,7 @@ en:
     no_voucher_expiration_applicable: "n/a"
     voucher_removed_for_amount_with_remaining_balance:  "Voucher payment of %{payment_amount} removed.  Remaining balance: %{available}"
     unable_to_remove_voucher: "We encountered an unknown error attempting to remove the voucher from this order"
+    voucher_mailer:
+      voucher_email:
+        dear_customer: "Dear customer, here are your vouchers:" 
+        subject: "Your voucher(s)"

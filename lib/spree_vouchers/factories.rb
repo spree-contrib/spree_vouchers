@@ -9,6 +9,10 @@ FactoryGirl.define do
     expiration 1.year.from_now
     original_amount 25.00
     currency 'USD'
+    voucher_from 'Jeff'
+    voucher_to 'Mom'
+    message 'I just called to say I love you'
+    line_item
 
     factory :authorized_voucher do
       authorized_amount 10

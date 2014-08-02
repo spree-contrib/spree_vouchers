@@ -1,0 +1,5 @@
+<%= Spree.t('voucher_mailer.shipped_email.dear_customer') %>
+
+  <%= render partial: 'spree/shared/voucher_email_vouchers', locals: {vouchers: [@voucher]} %>
+
+<%= Spree.t('voucher_mailer.voucher_email.thanks') %>
