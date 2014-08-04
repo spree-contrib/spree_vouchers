@@ -11,6 +11,7 @@ module Spree
     validates :remaining_amount, :numericality => { :less_than_or_equal_to => :original_amount }
     validates :number, uniqueness: true
 
+    accepts_nested_attributes_for :address
     scope :created_between, ->(start_date, end_date) { where(created_at: start_date..end_date) }
 
     def address
@@ -158,6 +159,21 @@ module Spree
 
     def authorizable_amount
       remaining_amount - authorized_amount
+    end
+
+    def ==(other)
+      return false unless other
+
+      # intentionally skipping number and line_item_id
+      return self.expiration == other.expiration &&
+             self.original_amount == other.original_amount &&
+             self.currency == other.currency &&
+             self.voucher_from == other.voucher_from &&
+             self.voucher_to == other.voucher_to &&
+             self.message == other.message &&
+             self.delivery_method == other.delivery_method &&
+             self.active == other.active &&
+             self.address == other.address
     end
 
     private

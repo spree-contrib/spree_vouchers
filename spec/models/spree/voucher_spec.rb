@@ -8,6 +8,53 @@ describe Spree::Voucher do
   let(:fully_authorized_voucher) { create(:fully_authorized_voucher) }
   let(:voucher_payment_method) { create(:voucher_payment_method) }
 
+  context "comparing" do
+    before do
+      @voucher = voucher
+      @line_item = @voucher.line_item
+      @order = @line_item.order
+    end
+
+    context "new voucher" do
+      it "correctly determines equality" do
+        @order.vouchers_match(@line_item, ActiveSupport::HashWithIndifferentAccess.new(@voucher.attributes)).should be_truthy
+      end
+
+      it "correctly determines inequality" do
+        attrs = ActiveSupport::HashWithIndifferentAccess.new(
+             line_item_id: @line_item.id,
+             expiration: DateTime.now,
+             original_amount: 5,
+             currency: 'USD',
+             voucher_from: 'Jeff',
+             voucher_to: 'Bob',
+             message: 'whatever',
+             delivery_method: 'email',
+             active: true,
+             address_attributes: FactoryGirl.build(:address).attributes
+        )
+        @order.vouchers_match(@line_item, attrs).should be_falsey
+      end
+    end
+
+    context "existing voucher" do
+      before do
+        @voucher2 = @voucher.dup
+        @voucher2.number = nil
+        @voucher2.save!
+        @line_item2 = FactoryGirl.create(:line_item)
+        @voucher2.update_attributes(line_item_id: @line_item2.id)
+      end
+      it "correctly determines equality" do
+        @order.vouchers_match(@line_item, @voucher2.line_item).should be_truthy
+      end
+      it "correctly determines inequality" do
+        @voucher2.update_attributes(expiration: 1.hour.from_now)
+        @order.vouchers_match(@line_item, @voucher2.line_item).should be_falsey
+      end
+    end
+  end
+
   context "creation" do
     before do
       @address = FactoryGirl.create(:address)

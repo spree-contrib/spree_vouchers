@@ -13,6 +13,8 @@ module SpreeVouchers
       Dir.glob(File.join(File.dirname(__FILE__), '../../app/**/*_decorator*.rb')) do |c|
         Rails.configuration.cache_classes ? require(c) : load(c)
       end
+
+      Spree::Order.register_line_item_comparison_hook(:vouchers_match) if Spree::Order.table_exists?
     end
 
     initializer "spree_vouchers.register.payment_methods" do |app|

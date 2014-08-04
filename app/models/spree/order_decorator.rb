@@ -48,6 +48,22 @@ module Spree
       line_items.map(&:vouchers).flatten
     end
 
+    def vouchers_match(line_item, other_line_item_or_voucher_attributes)
+      existing_voucher = line_item.vouchers.first
+
+      if other_line_item_or_voucher_attributes.kind_of? ActiveSupport::HashWithIndifferentAccess
+        # if there aren't any voucher attributes, there's a 'match'
+        return true if existing_voucher.nil? && other_line_item_or_voucher_attributes.empty?
+        new_voucher = Spree::Voucher.new(other_line_item_or_voucher_attributes.merge(line_item_id: line_item.id))
+      else
+        # a line item was passed in
+        # we are intentionally ignoring line_item_id as this method is called 
+        # during a merge operation between 2 orders
+        new_voucher = other_line_item_or_voucher_attributes.vouchers.first
+      end
+      return existing_voucher == new_voucher
+    end
+
     private
       def deactivate_vouchers
         vouchers.each do |voucher|

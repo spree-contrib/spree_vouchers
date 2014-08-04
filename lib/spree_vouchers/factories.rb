@@ -12,6 +12,7 @@ FactoryGirl.define do
     voucher_from 'Jeff'
     voucher_to 'Mom'
     message 'I just called to say I love you'
+    active true
     line_item
 
     factory :authorized_voucher do
