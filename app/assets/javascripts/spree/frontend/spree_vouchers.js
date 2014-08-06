@@ -1,5 +1,6 @@
 //= require spree/frontend/apply_voucher
 //= require spree/frontend/remove_voucher
+//= require spree/frontend/voucher_product
 //= require_self
 
 var SpreeVouchers = {

@@ -2,8 +2,8 @@ module Spree
   class Voucher < ActiveRecord::Base
     has_many :payments, as: :source
     has_many :voucher_events
-    belongs_to :address
-    belongs_to :line_item
+    belongs_to :address # do not call 'address' directly.  Use ship_address to get either this or the order's ship address
+    belongs_to :line_item, inverse_of: :vouchers
     before_validation(on: :create) { self.remaining_amount = original_amount }
     before_validation :generate_voucher_number, on: :create
 
@@ -14,11 +14,15 @@ module Spree
     accepts_nested_attributes_for :address
     scope :created_between, ->(start_date, end_date) { where(created_at: start_date..end_date) }
 
-    def address
-      if self[:address_id]
-        return Address.find self[:address_id]
+    def self.permitted_attributes 
+      [:number,:expiration,:original_amount,:currency,:voucher_from,:voucher_to,:message,:delivery_method,:active,:address => PermittedAttributes.address_attributes]
+    end
+
+    def ship_address
+      if address
+        return address
       else
-        return line_item.order.ship_address
+        order.try(:ship_address)
       end
     end
 

@@ -10,13 +10,10 @@ describe Spree::OrderPopulator do
     it "builds a voucher" do
       expect {
         subject.populate(variant.id, 1, 
-                         options: { vouchers: {
-                             number: '1234',
-                             original_amount: 10,
-                             currency: 'USD'
-                           }
-                         }
-                         )
+                         ActionController::Parameters.new({vouchers_attributes: [
+                           number: '1234',
+                           original_amount: 10,
+                           currency: 'USD']}))
       }.to change {
         order.line_items.map(&:vouchers).flatten.size
       }.by 1

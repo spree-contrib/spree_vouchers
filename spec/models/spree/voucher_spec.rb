@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe Spree::Voucher do
   let(:voucher) { create(:voucher) }
+  let(:voucher_with_address) { create(:voucher_with_address) }
+
   let(:expired_voucher) { create(:expired_voucher) }
   let(:exhausted_voucher) { create(:exhausted_voucher) }
   let(:authorized_voucher) { create(:authorized_voucher) }
@@ -9,68 +11,70 @@ describe Spree::Voucher do
   let(:voucher_payment_method) { create(:voucher_payment_method) }
 
   context "comparing" do
-    before do
-      @voucher = voucher
-      @line_item = @voucher.line_item
-      @order = @line_item.order
-    end
-
     context "new voucher" do
-      it "correctly determines equality" do
-        @order.vouchers_match(@line_item, ActiveSupport::HashWithIndifferentAccess.new(@voucher.attributes)).should be_truthy
+      context "equality" do
+        it "correctly determines equality (no address)" do
+          @line_item = voucher.line_item
+          @order = @line_item.order
+
+          @order.vouchers_match(@line_item,  ActionController::Parameters.new(voucher.attributes)).should be_truthy
+        end
+
+        it "correctly determines equality (with address)" do
+          @line_item = voucher_with_address.line_item
+          @order = @line_item.order
+
+          @order.vouchers_match(@line_item, ActionController::Parameters.new(voucher_with_address.attributes.merge(address_attributes: voucher_with_address.address.attributes))).should be_truthy
+        end
       end
 
-      it "correctly determines inequality" do
-        attrs = ActiveSupport::HashWithIndifferentAccess.new(
-             line_item_id: @line_item.id,
-             expiration: DateTime.now,
-             original_amount: 5,
-             currency: 'USD',
-             voucher_from: 'Jeff',
-             voucher_to: 'Bob',
-             message: 'whatever',
-             delivery_method: 'email',
-             active: true,
-             address_attributes: FactoryGirl.build(:address).attributes
-        )
-        @order.vouchers_match(@line_item, attrs).should be_falsey
+      context "inequality" do
+        it "correctly determines inequality (no address)" do
+          @line_item = voucher.line_item
+          @order = @line_item.order
+
+          @attrs = ActionController::Parameters.new(
+                                                   line_item_id: @line_item.id,
+                                                   expiration: DateTime.now,
+                                                   original_amount: 5,
+                                                   currency: 'USD',
+                                                   voucher_from: 'Jeff',
+                                                   voucher_to: 'Bob',
+                                                   message: 'whatever',
+                                                   delivery_method: 'email',
+                                                   active: true)
+
+          @order.vouchers_match(@line_item, @attrs).should be_falsey
+        end
       end
     end
 
     context "existing voucher" do
       before do
-        @voucher2 = @voucher.dup
+        @voucher2 = voucher.dup
         @voucher2.number = nil
         @voucher2.save!
         @line_item2 = FactoryGirl.create(:line_item)
         @voucher2.update_attributes(line_item_id: @line_item2.id)
+        @order = @line_item2.order
       end
       it "correctly determines equality" do
-        @order.vouchers_match(@line_item, @voucher2.line_item).should be_truthy
+        @order.vouchers_match(voucher.line_item, @line_item2).should be_truthy
       end
       it "correctly determines inequality" do
         @voucher2.update_attributes(expiration: 1.hour.from_now)
-        @order.vouchers_match(@line_item, @voucher2.line_item).should be_falsey
+        @order.vouchers_match(voucher.line_item, @line_item2).should be_falsey
       end
     end
   end
 
   context "creation" do
-    before do
-      @address = FactoryGirl.create(:address)
-    end
-
     it "uses the order shipping address by default" do
       order = voucher.line_item.order
-      order.ship_address = @address
-      order.save!
-      
-      voucher.address.should == order.ship_address
+      voucher.ship_address.should == order.ship_address
     end
     it "uses the voucher address when provided" do
-      voucher.address= @address
-      voucher.save!
-      voucher.address.should == @address
+      voucher_with_address.ship_address.should == voucher_with_address.address
     end
   end
 

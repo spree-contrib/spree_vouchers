@@ -54,13 +54,25 @@ module Spree
       if other_line_item_or_voucher_attributes.kind_of? ActiveSupport::HashWithIndifferentAccess
         # if there aren't any voucher attributes, there's a 'match'
         return true if existing_voucher.nil? && other_line_item_or_voucher_attributes.empty?
-        new_voucher = Spree::Voucher.new(other_line_item_or_voucher_attributes.merge(line_item_id: line_item.id))
+
+        attrs = other_line_item_or_voucher_attributes.dup
+        address_attrs = ActionController::Parameters.new(attrs.delete(:address_attributes))
+
+        new_voucher = Voucher.new(attrs.permit(Voucher.permitted_attributes))
+
+        if attrs[:delivery_method] == 'physical'
+          a = Address.new(address_attrs.permit(PermittedAttributes.address_attributes))
+          new_voucher.address = a if a.valid?
+          # CODE_REVIEW: ok to handle validation on front end only? the add-to-cart 
+          # flow isn't designed to handle validation errors
+        end
       else
         # a line item was passed in
         # we are intentionally ignoring line_item_id as this method is called 
         # during a merge operation between 2 orders
         new_voucher = other_line_item_or_voucher_attributes.vouchers.first
       end
+
       return existing_voucher == new_voucher
     end
 

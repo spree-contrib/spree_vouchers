@@ -7,6 +7,7 @@ class CreateSpreeVouchers < ActiveRecord::Migration
       t.decimal :remaining_amount, :null =>false, :precision => 8, :scale => 2
       t.decimal :authorized_amount, :default => 0, :null =>false, :precision => 8, :scale => 2
       t.string :currency
+      t.timestamps
     end
 
     add_index :spree_vouchers, :expiration

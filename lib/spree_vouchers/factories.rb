@@ -5,7 +5,7 @@ FactoryGirl.define do
   end
 
   factory :voucher, :class => 'Spree::Voucher' do
-    number '12341234abcdefg'
+    number Faker.numerify("#########")
     expiration 1.year.from_now
     original_amount 25.00
     currency 'USD'
@@ -14,7 +14,16 @@ FactoryGirl.define do
     message 'I just called to say I love you'
     active true
     line_item
+    delivery_method 'physical'
 
+    factory :voucher_with_address do
+      number Faker.numerify("#########")
+
+      after(:build) { |v|
+        v.address = FactoryGirl.build(:address)
+      }
+    end
+ 
     factory :authorized_voucher do
       authorized_amount 10
 
