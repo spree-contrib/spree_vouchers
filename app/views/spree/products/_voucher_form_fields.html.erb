@@ -4,7 +4,7 @@
 
 <%# if @product.voucher? .... %>
 
-<% param_prefix = "vouchers" %>
+<% param_prefix = "options[vouchers_attributes][]" %>
 
   <fieldset>
     From: <%= text_field_tag "#{param_prefix}[voucher_from]" %>
@@ -19,11 +19,15 @@
   </fieldset>
 
   <fieldset>
+    Amount: <%= number_field_tag "#{param_prefix}[original_amount]" %>
+  </fieldset>
+
+  <fieldset>
     Deliver by email: <%= radio_button_tag "#{param_prefix}[delivery_method]", "email", true, id: 'email_delivery' %>
     Deliver by mail: <%= radio_button_tag "#{param_prefix}[delivery_method]", "physical", false, id: 'physical_delivery' %>
   </fieldset>
 
   <fieldset id="voucher_address" style="display: none;">
       <legend align="center">Voucher Address</legend>
-      <%= render :partial => 'voucher_address', :locals => { :form => form, :address_type => 'voucher_address', :address => Spree::Address.new(country: Spree::Country.first), :param_prefix => "#{param_prefix}[address]" } %>
+      <%= render :partial => 'voucher_address', :locals => { :form => form, :address_type => 'voucher_address', :address => Spree::Address.new(country: Spree::Country.first), :param_prefix => "#{param_prefix}[address_attributes]" } %>
   </fieldset>

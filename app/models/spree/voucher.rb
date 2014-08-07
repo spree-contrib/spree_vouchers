@@ -15,7 +15,7 @@ module Spree
     scope :created_between, ->(start_date, end_date) { where(created_at: start_date..end_date) }
 
     def self.permitted_attributes 
-      [:number,:expiration,:original_amount,:currency,:voucher_from,:voucher_to,:message,:delivery_method,:active,:address => PermittedAttributes.address_attributes]
+      [:number,:expiration,:original_amount,:currency,:voucher_from,:voucher_to,:message,:delivery_method,:active,:address_attributes => PermittedAttributes.address_attributes]
     end
 
     def ship_address

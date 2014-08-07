@@ -17,14 +17,14 @@ describe Spree::Voucher do
           @line_item = voucher.line_item
           @order = @line_item.order
 
-          @order.vouchers_match(@line_item,  ActionController::Parameters.new(voucher.attributes)).should be_truthy
+          @order.vouchers_attributes_match(@line_item,  [ActionController::Parameters.new(voucher.attributes)]).should be_truthy
         end
 
         it "correctly determines equality (with address)" do
           @line_item = voucher_with_address.line_item
           @order = @line_item.order
 
-          @order.vouchers_match(@line_item, ActionController::Parameters.new(voucher_with_address.attributes.merge(address_attributes: voucher_with_address.address.attributes))).should be_truthy
+          @order.vouchers_attributes_match(@line_item, [ActionController::Parameters.new(voucher_with_address.attributes.merge(address_attributes: voucher_with_address.address.attributes))]).should be_truthy
         end
       end
 
@@ -33,7 +33,7 @@ describe Spree::Voucher do
           @line_item = voucher.line_item
           @order = @line_item.order
 
-          @attrs = ActionController::Parameters.new(
+          @attrs = [ActionController::Parameters.new(
                                                    line_item_id: @line_item.id,
                                                    expiration: DateTime.now,
                                                    original_amount: 5,
@@ -42,9 +42,9 @@ describe Spree::Voucher do
                                                    voucher_to: 'Bob',
                                                    message: 'whatever',
                                                    delivery_method: 'email',
-                                                   active: true)
+                                                   active: true)]
 
-          @order.vouchers_match(@line_item, @attrs).should be_falsey
+          @order.vouchers_attributes_match(@line_item, @attrs).should be_falsey
         end
       end
     end
@@ -59,11 +59,11 @@ describe Spree::Voucher do
         @order = @line_item2.order
       end
       it "correctly determines equality" do
-        @order.vouchers_match(voucher.line_item, @line_item2).should be_truthy
+        @order.vouchers_attributes_match(voucher.line_item, @line_item2).should be_truthy
       end
       it "correctly determines inequality" do
         @voucher2.update_attributes(expiration: 1.hour.from_now)
-        @order.vouchers_match(voucher.line_item, @line_item2).should be_falsey
+        @order.vouchers_attributes_match(voucher.line_item, @line_item2).should be_falsey
       end
     end
   end

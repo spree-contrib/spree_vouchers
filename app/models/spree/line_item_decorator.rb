@@ -3,7 +3,9 @@ module Spree
     mattr_writer :line_item_attributes
   end
 
-  PermittedAttributes.line_item_attributes += [vouchers_attributes: Voucher.permitted_attributes]
+  unless PermittedAttributes.line_item_attributes.include? :vouchers_attributes
+    PermittedAttributes.line_item_attributes += [vouchers_attributes: Voucher.permitted_attributes] 
+  end
 
   LineItem.class_eval do
     has_many :vouchers #, inverse_of: :line_item # one per quantity

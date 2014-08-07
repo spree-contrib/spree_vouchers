@@ -48,14 +48,15 @@ module Spree
       line_items.map(&:vouchers).flatten
     end
 
-    def vouchers_match(line_item, other_line_item_or_voucher_attributes)
+    def vouchers_attributes_match(line_item, other_line_item_or_voucher_attributes)
       existing_voucher = line_item.vouchers.first
 
-      if other_line_item_or_voucher_attributes.kind_of? ActiveSupport::HashWithIndifferentAccess
-        # if there aren't any voucher attributes, there's a 'match'
-        return true if existing_voucher.nil? && other_line_item_or_voucher_attributes.empty?
+      if other_line_item_or_voucher_attributes.kind_of? Array
+        voucher_attrs = other_line_item_or_voucher_attributes.first
+         # if there aren't any voucher attributes, there's a 'match'
+        return true if existing_voucher.nil? && (voucher_attrs.nil? || voucher_attrs.empty?)
 
-        attrs = other_line_item_or_voucher_attributes.dup
+        attrs = voucher_attrs.dup
         address_attrs = ActionController::Parameters.new(attrs.delete(:address_attributes))
 
         new_voucher = Voucher.new(attrs.permit(Voucher.permitted_attributes))
