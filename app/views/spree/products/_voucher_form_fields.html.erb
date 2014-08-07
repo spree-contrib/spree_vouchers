@@ -5,6 +5,7 @@
 <%# if @product.voucher? .... %>
 
 <% param_prefix = "options[vouchers_attributes][]" %>
+  <%= hidden_field_tag "#{param_prefix}[currency]", current_currency %>
 
   <fieldset>
     From: <%= text_field_tag "#{param_prefix}[voucher_from]" %>

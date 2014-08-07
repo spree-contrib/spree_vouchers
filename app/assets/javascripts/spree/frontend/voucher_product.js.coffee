@@ -59,13 +59,17 @@ Spree.ready ($) ->
       ($ '#vcountry select').change ->
         Spree.updateState()
 
+      ($ '#voucher_address').find('input,select').prop 'disabled', true
   Spree.onVoucherAddress()
 
   $('#physical_delivery').click (ele)->
     if $('#physical_delivery').prop("checked")
       ($ '#voucher_address').show()
+      ($ '#voucher_address').find('input,select').prop 'disabled', false
+
 
   $('#email_delivery').click (ele)->
     if $('#email_delivery').prop("checked")
       ($ '#voucher_address').hide()
+      ($ '#voucher_address').find('input,select').prop 'disabled', true
 
