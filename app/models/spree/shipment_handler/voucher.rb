@@ -1,5 +1,5 @@
 module Spree
-  module ShipmentHandler
+  class ShipmentHandler
     class Voucher < Spree::ShipmentHandler
       def perform
         @shipment.line_items.each do |line_item|
